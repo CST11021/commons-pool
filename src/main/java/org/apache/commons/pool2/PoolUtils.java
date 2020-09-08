@@ -66,12 +66,9 @@ public final class PoolUtils {
      * error handling for operations that throw exceptions that normally need to
      * be ignored.
      *
-     * @param t
-     *            The Throwable to check
-     * @throws ThreadDeath
-     *             if that is passed in
-     * @throws VirtualMachineError
-     *             if that is passed in
+     * @param t The Throwable to check
+     * @throws ThreadDeath         if that is passed in
+     * @throws VirtualMachineError if that is passed in
      */
     public static void checkRethrow(final Throwable t) {
         if (t instanceof ThreadDeath) {
@@ -88,24 +85,20 @@ public final class PoolUtils {
      * object will be added per period. If there is an exception when calling
      * {@link ObjectPool#addObject()} then no more checks will be performed.
      *
-     * @param pool
-     *            the pool to check periodically.
-     * @param minIdle
-     *            if the {@link ObjectPool#getNumIdle()} is less than this then
-     *            add an idle object.
-     * @param period
-     *            the frequency to check the number of idle objects in a pool,
-     *            see {@link Timer#schedule(TimerTask, long, long)}.
-     * @param <T> the type of objects in the pool
+     * @param pool    the pool to check periodically.
+     * @param minIdle if the {@link ObjectPool#getNumIdle()} is less than this then
+     *                add an idle object.
+     * @param period  the frequency to check the number of idle objects in a pool,
+     *                see {@link Timer#schedule(TimerTask, long, long)}.
+     * @param <T>     the type of objects in the pool
      * @return the {@link TimerTask} that will periodically check the pools idle
-     *         object count.
-     * @throws IllegalArgumentException
-     *             when <code>pool</code> is <code>null</code> or when
-     *             <code>minIdle</code> is negative or when <code>period</code>
-     *             isn't valid for {@link Timer#schedule(TimerTask, long, long)}
+     * object count.
+     * @throws IllegalArgumentException when <code>pool</code> is <code>null</code> or when
+     *                                  <code>minIdle</code> is negative or when <code>period</code>
+     *                                  isn't valid for {@link Timer#schedule(TimerTask, long, long)}
      */
     public static <T> TimerTask checkMinIdle(final ObjectPool<T> pool,
-            final int minIdle, final long period)
+                                             final int minIdle, final long period)
             throws IllegalArgumentException {
         if (pool == null) {
             throw new IllegalArgumentException(MSG_NULL_KEYED_POOL);
@@ -124,25 +117,20 @@ public final class PoolUtils {
      * when calling {@link KeyedObjectPool#addObject(Object)} then no more
      * checks for that key will be performed.
      *
-     * @param keyedPool
-     *            the keyedPool to check periodically.
-     * @param key
-     *            the key to check the idle count of.
-     * @param minIdle
-     *            if the {@link KeyedObjectPool#getNumIdle(Object)} is less than
-     *            this then add an idle object.
-     * @param period
-     *            the frequency to check the number of idle objects in a
-     *            keyedPool, see {@link Timer#schedule(TimerTask, long, long)}.
-     * @param <K> the type of the pool key
-     * @param <V> the type of pool entries
+     * @param keyedPool the keyedPool to check periodically.
+     * @param key       the key to check the idle count of.
+     * @param minIdle   if the {@link KeyedObjectPool#getNumIdle(Object)} is less than
+     *                  this then add an idle object.
+     * @param period    the frequency to check the number of idle objects in a
+     *                  keyedPool, see {@link Timer#schedule(TimerTask, long, long)}.
+     * @param <K>       the type of the pool key
+     * @param <V>       the type of pool entries
      * @return the {@link TimerTask} that will periodically check the pools idle
-     *         object count.
-     * @throws IllegalArgumentException
-     *             when <code>keyedPool</code>, <code>key</code> is
-     *             <code>null</code> or when <code>minIdle</code> is negative or
-     *             when <code>period</code> isn't valid for
-     *             {@link Timer#schedule(TimerTask, long, long)}.
+     * object count.
+     * @throws IllegalArgumentException when <code>keyedPool</code>, <code>key</code> is
+     *                                  <code>null</code> or when <code>minIdle</code> is negative or
+     *                                  when <code>period</code> isn't valid for
+     *                                  {@link Timer#schedule(TimerTask, long, long)}.
      */
     public static <K, V> TimerTask checkMinIdle(
             final KeyedObjectPool<K, V> keyedPool, final K key,
@@ -168,26 +156,21 @@ public final class PoolUtils {
      * <code>Collection</code> <code>keys</code> in the keyedPool. At most one
      * idle object will be added per period.
      *
-     * @param keyedPool
-     *            the keyedPool to check periodically.
-     * @param keys
-     *            a collection of keys to check the idle object count.
-     * @param minIdle
-     *            if the {@link KeyedObjectPool#getNumIdle(Object)} is less than
-     *            this then add an idle object.
-     * @param period
-     *            the frequency to check the number of idle objects in a
-     *            keyedPool, see {@link Timer#schedule(TimerTask, long, long)}.
-     * @param <K> the type of the pool key
-     * @param <V> the type of pool entries
+     * @param keyedPool the keyedPool to check periodically.
+     * @param keys      a collection of keys to check the idle object count.
+     * @param minIdle   if the {@link KeyedObjectPool#getNumIdle(Object)} is less than
+     *                  this then add an idle object.
+     * @param period    the frequency to check the number of idle objects in a
+     *                  keyedPool, see {@link Timer#schedule(TimerTask, long, long)}.
+     * @param <K>       the type of the pool key
+     * @param <V>       the type of pool entries
      * @return a {@link Map} of key and {@link TimerTask} pairs that will
-     *         periodically check the pools idle object count.
-     * @throws IllegalArgumentException
-     *             when <code>keyedPool</code>, <code>keys</code>, or any of the
-     *             values in the collection is <code>null</code> or when
-     *             <code>minIdle</code> is negative or when <code>period</code>
-     *             isn't valid for {@link Timer#schedule(TimerTask, long, long)}
-     *             .
+     * periodically check the pools idle object count.
+     * @throws IllegalArgumentException when <code>keyedPool</code>, <code>keys</code>, or any of the
+     *                                  values in the collection is <code>null</code> or when
+     *                                  <code>minIdle</code> is negative or when <code>period</code>
+     *                                  isn't valid for {@link Timer#schedule(TimerTask, long, long)}
+     *                                  .
      * @see #checkMinIdle(KeyedObjectPool, Object, int, long)
      */
     public static <K, V> Map<K, TimerTask> checkMinIdle(
@@ -211,15 +194,11 @@ public final class PoolUtils {
      * Calls {@link ObjectPool#addObject()} on <code>pool</code> <code>count</code>
      * number of times.
      *
-     * @param pool
-     *            the pool to prefill.
-     * @param count
-     *            the number of idle objects to add.
-     * @param <T> the type of objects in the pool
-     * @throws Exception
-     *             when {@link ObjectPool#addObject()} fails.
-     * @throws IllegalArgumentException
-     *             when <code>pool</code> is <code>null</code>.
+     * @param pool  the pool to prefill.
+     * @param count the number of idle objects to add.
+     * @param <T>   the type of objects in the pool
+     * @throws Exception                when {@link ObjectPool#addObject()} fails.
+     * @throws IllegalArgumentException when <code>pool</code> is <code>null</code>.
      * @deprecated Use {@link ObjectPool#addObjects(int)}.
      */
     @Deprecated
@@ -235,24 +214,19 @@ public final class PoolUtils {
      * Calls {@link KeyedObjectPool#addObject(Object)} on <code>keyedPool</code> with
      * <code>key</code> <code>count</code> number of times.
      *
-     * @param keyedPool
-     *            the keyedPool to prefill.
-     * @param key
-     *            the key to add objects for.
-     * @param count
-     *            the number of idle objects to add for <code>key</code>.
-     * @param <K> the type of the pool key
-     * @param <V> the type of pool entries
-     * @throws Exception
-     *             when {@link KeyedObjectPool#addObject(Object)} fails.
-     * @throws IllegalArgumentException
-     *             when <code>keyedPool</code> or <code>key</code> is
-     *             <code>null</code>.
+     * @param keyedPool the keyedPool to prefill.
+     * @param key       the key to add objects for.
+     * @param count     the number of idle objects to add for <code>key</code>.
+     * @param <K>       the type of the pool key
+     * @param <V>       the type of pool entries
+     * @throws Exception                when {@link KeyedObjectPool#addObject(Object)} fails.
+     * @throws IllegalArgumentException when <code>keyedPool</code> or <code>key</code> is
+     *                                  <code>null</code>.
      * @deprecated Use {@link KeyedObjectPool#addObjects(Object, int)}.
      */
     @Deprecated
     public static <K, V> void prefill(final KeyedObjectPool<K, V> keyedPool,
-            final K key, final int count) throws Exception,
+                                      final K key, final int count) throws Exception,
             IllegalArgumentException {
         if (keyedPool == null) {
             throw new IllegalArgumentException(MSG_NULL_KEYED_POOL);
@@ -266,25 +240,20 @@ public final class PoolUtils {
      * the same effect as calling {@link #prefill(KeyedObjectPool, Object, int)}
      * for each key in the <code>keys</code> collection.
      *
-     * @param keyedPool
-     *            the keyedPool to prefill.
-     * @param keys
-     *            {@link Collection} of keys to add objects for.
-     * @param count
-     *            the number of idle objects to add for each <code>key</code>.
-     * @param <K> the type of the pool key
-     * @param <V> the type of pool entries
-     * @throws Exception
-     *             when {@link KeyedObjectPool#addObject(Object)} fails.
-     * @throws IllegalArgumentException
-     *             when <code>keyedPool</code>, <code>keys</code>, or any value
-     *             in <code>keys</code> is <code>null</code>.
+     * @param keyedPool the keyedPool to prefill.
+     * @param keys      {@link Collection} of keys to add objects for.
+     * @param count     the number of idle objects to add for each <code>key</code>.
+     * @param <K>       the type of the pool key
+     * @param <V>       the type of pool entries
+     * @throws Exception                when {@link KeyedObjectPool#addObject(Object)} fails.
+     * @throws IllegalArgumentException when <code>keyedPool</code>, <code>keys</code>, or any value
+     *                                  in <code>keys</code> is <code>null</code>.
      * @see #prefill(KeyedObjectPool, Object, int)
      * @deprecated Use {@link KeyedObjectPool#addObjects(Collection, int)}.
      */
     @Deprecated
     public static <K, V> void prefill(final KeyedObjectPool<K, V> keyedPool,
-            final Collection<K> keys, final int count) throws Exception,
+                                      final Collection<K> keys, final int count) throws Exception,
             IllegalArgumentException {
         if (keys == null) {
             throw new IllegalArgumentException(MSG_NULL_KEYS);
@@ -304,9 +273,8 @@ public final class PoolUtils {
      * deadlock.
      * </p>
      *
-     * @param pool
-     *            the ObjectPool to be "wrapped" in a synchronized ObjectPool.
-     * @param <T> the type of objects in the pool
+     * @param pool the ObjectPool to be "wrapped" in a synchronized ObjectPool.
+     * @param <T>  the type of objects in the pool
      * @return a synchronized view of the specified ObjectPool.
      */
     public static <T> ObjectPool<T> synchronizedPool(final ObjectPool<T> pool) {
@@ -339,11 +307,10 @@ public final class PoolUtils {
      * deadlock.
      * </p>
      *
-     * @param keyedPool
-     *            the KeyedObjectPool to be "wrapped" in a synchronized
-     *            KeyedObjectPool.
-     * @param <K> the type of the pool key
-     * @param <V> the type of pool entries
+     * @param keyedPool the KeyedObjectPool to be "wrapped" in a synchronized
+     *                  KeyedObjectPool.
+     * @param <K>       the type of the pool key
+     * @param <V>       the type of pool entries
      * @return a synchronized view of the specified KeyedObjectPool.
      */
     public static <K, V> KeyedObjectPool<K, V> synchronizedPool(
@@ -364,10 +331,9 @@ public final class PoolUtils {
      * Returns a synchronized (thread-safe) PooledObjectFactory backed by the
      * specified PooledObjectFactory.
      *
-     * @param factory
-     *            the PooledObjectFactory to be "wrapped" in a synchronized
-     *            PooledObjectFactory.
-     * @param <T> the type of objects in the pool
+     * @param factory the PooledObjectFactory to be "wrapped" in a synchronized
+     *                PooledObjectFactory.
+     * @param <T>     the type of objects in the pool
      * @return a synchronized view of the specified PooledObjectFactory.
      */
     public static <T> PooledObjectFactory<T> synchronizedPooledFactory(
@@ -379,11 +345,10 @@ public final class PoolUtils {
      * Returns a synchronized (thread-safe) KeyedPooledObjectFactory backed by
      * the specified KeyedPoolableObjectFactory.
      *
-     * @param keyedFactory
-     *            the KeyedPooledObjectFactory to be "wrapped" in a
-     *            synchronized KeyedPooledObjectFactory.
-     * @param <K> the type of the pool key
-     * @param <V> the type of pool entries
+     * @param keyedFactory the KeyedPooledObjectFactory to be "wrapped" in a
+     *                     synchronized KeyedPooledObjectFactory.
+     * @param <K>          the type of the pool key
+     * @param <V>          the type of pool entries
      * @return a synchronized view of the specified KeyedPooledObjectFactory.
      */
     public static <K, V> KeyedPooledObjectFactory<K, V> synchronizedKeyedPooledFactory(
@@ -398,12 +363,11 @@ public final class PoolUtils {
      * This is also an effective way to shrink FIFO ordered pools that
      * experience load spikes.
      *
-     * @param pool
-     *            the ObjectPool to be decorated so it shrinks its idle count
-     *            when possible.
-     * @param <T> the type of objects in the pool
+     * @param pool the ObjectPool to be decorated so it shrinks its idle count
+     *             when possible.
+     * @param <T>  the type of objects in the pool
      * @return a pool that adaptively decreases its size when idle objects are
-     *         no longer needed.
+     * no longer needed.
      * @see #erodingPool(ObjectPool, float)
      */
     public static <T> ObjectPool<T> erodingPool(final ObjectPool<T> pool) {
@@ -423,21 +387,19 @@ public final class PoolUtils {
      * to less frequently try to shrink its size.
      * </p>
      *
-     * @param pool
-     *            the ObjectPool to be decorated so it shrinks its idle count
-     *            when possible.
-     * @param factor
-     *            a positive value to scale the rate at which the pool tries to
-     *            reduce its size. If 0 &lt; factor &lt; 1 then the pool
-     *            shrinks more aggressively. If 1 &lt; factor then the pool
-     *            shrinks less aggressively.
-     * @param <T> the type of objects in the pool
+     * @param pool   the ObjectPool to be decorated so it shrinks its idle count
+     *               when possible.
+     * @param factor a positive value to scale the rate at which the pool tries to
+     *               reduce its size. If 0 &lt; factor &lt; 1 then the pool
+     *               shrinks more aggressively. If 1 &lt; factor then the pool
+     *               shrinks less aggressively.
+     * @param <T>    the type of objects in the pool
      * @return a pool that adaptively decreases its size when idle objects are
-     *         no longer needed.
+     * no longer needed.
      * @see #erodingPool(ObjectPool)
      */
     public static <T> ObjectPool<T> erodingPool(final ObjectPool<T> pool,
-            final float factor) {
+                                                final float factor) {
         if (pool == null) {
             throw new IllegalArgumentException(MSG_NULL_POOL);
         }
@@ -454,13 +416,12 @@ public final class PoolUtils {
      * This is also an effective way to shrink FIFO ordered pools that
      * experience load spikes.
      *
-     * @param keyedPool
-     *            the KeyedObjectPool to be decorated so it shrinks its idle
-     *            count when possible.
-     * @param <K> the type of the pool key
-     * @param <V> the type of pool entries
+     * @param keyedPool the KeyedObjectPool to be decorated so it shrinks its idle
+     *                  count when possible.
+     * @param <K>       the type of the pool key
+     * @param <V>       the type of pool entries
      * @return a pool that adaptively decreases its size when idle objects are
-     *         no longer needed.
+     * no longer needed.
      * @see #erodingPool(KeyedObjectPool, float)
      * @see #erodingPool(KeyedObjectPool, float, boolean)
      */
@@ -482,18 +443,16 @@ public final class PoolUtils {
      * to less frequently try to shrink its size.
      * </p>
      *
-     * @param keyedPool
-     *            the KeyedObjectPool to be decorated so it shrinks its idle
-     *            count when possible.
-     * @param factor
-     *            a positive value to scale the rate at which the pool tries to
-     *            reduce its size. If 0 &lt; factor &lt; 1 then the pool
-     *            shrinks more aggressively. If 1 &lt; factor then the pool
-     *            shrinks less aggressively.
-     * @param <K> the type of the pool key
-     * @param <V> the type of pool entries
+     * @param keyedPool the KeyedObjectPool to be decorated so it shrinks its idle
+     *                  count when possible.
+     * @param factor    a positive value to scale the rate at which the pool tries to
+     *                  reduce its size. If 0 &lt; factor &lt; 1 then the pool
+     *                  shrinks more aggressively. If 1 &lt; factor then the pool
+     *                  shrinks less aggressively.
+     * @param <K>       the type of the pool key
+     * @param <V>       the type of pool entries
      * @return a pool that adaptively decreases its size when idle objects are
-     *         no longer needed.
+     * no longer needed.
      * @see #erodingPool(KeyedObjectPool, float, boolean)
      */
     public static <K, V> KeyedObjectPool<K, V> erodingPool(
@@ -520,20 +479,17 @@ public final class PoolUtils {
      * true, each key is shrunk independently.
      * </p>
      *
-     * @param keyedPool
-     *            the KeyedObjectPool to be decorated so it shrinks its idle
-     *            count when possible.
-     * @param factor
-     *            a positive value to scale the rate at which the pool tries to
-     *            reduce its size. If 0 &lt; factor &lt; 1 then the pool
-     *            shrinks more aggressively. If 1 &lt; factor then the pool
-     *            shrinks less aggressively.
-     * @param perKey
-     *            when true, each key is treated independently.
-     * @param <K> the type of the pool key
-     * @param <V> the type of pool entries
+     * @param keyedPool the KeyedObjectPool to be decorated so it shrinks its idle
+     *                  count when possible.
+     * @param factor    a positive value to scale the rate at which the pool tries to
+     *                  reduce its size. If 0 &lt; factor &lt; 1 then the pool
+     *                  shrinks more aggressively. If 1 &lt; factor then the pool
+     *                  shrinks less aggressively.
+     * @param perKey    when true, each key is treated independently.
+     * @param <K>       the type of the pool key
+     * @param <V>       the type of pool entries
      * @return a pool that adaptively decreases its size when idle objects are
-     *         no longer needed.
+     * no longer needed.
      * @see #erodingPool(KeyedObjectPool)
      * @see #erodingPool(KeyedObjectPool, float)
      */
@@ -570,22 +526,23 @@ public final class PoolUtils {
      */
     private static final class ObjectPoolMinIdleTimerTask<T> extends TimerTask {
 
-        /** Minimum number of idle instances. Not the same as pool.getMinIdle(). */
+        /**
+         * Minimum number of idle instances. Not the same as pool.getMinIdle().
+         */
         private final int minIdle;
 
-        /** Object pool */
+        /**
+         * Object pool
+         */
         private final ObjectPool<T> pool;
 
         /**
          * Create a new ObjectPoolMinIdleTimerTask for the given pool with the
          * given minIdle setting.
          *
-         * @param pool
-         *            object pool
-         * @param minIdle
-         *            number of idle instances to maintain
-         * @throws IllegalArgumentException
-         *             if the pool is null
+         * @param pool    object pool
+         * @param minIdle number of idle instances to maintain
+         * @throws IllegalArgumentException if the pool is null
          */
         ObjectPoolMinIdleTimerTask(final ObjectPool<T> pool, final int minIdle)
                 throws IllegalArgumentException {
@@ -643,29 +600,31 @@ public final class PoolUtils {
     private static final class KeyedObjectPoolMinIdleTimerTask<K, V> extends
             TimerTask {
 
-        /** Minimum number of idle instances. Not the same as pool.getMinIdle(). */
+        /**
+         * Minimum number of idle instances. Not the same as pool.getMinIdle().
+         */
         private final int minIdle;
 
-        /** Key to ensure minIdle for */
+        /**
+         * Key to ensure minIdle for
+         */
         private final K key;
 
-        /** Keyed object pool */
+        /**
+         * Keyed object pool
+         */
         private final KeyedObjectPool<K, V> keyedPool;
 
         /**
          * Creates a new KeyedObjecPoolMinIdleTimerTask.
          *
-         * @param keyedPool
-         *            keyed object pool
-         * @param key
-         *            key to ensure minimum number of idle instances
-         * @param minIdle
-         *            minimum number of idle instances
-         * @throws IllegalArgumentException
-         *             if the key is null
+         * @param keyedPool keyed object pool
+         * @param key       key to ensure minimum number of idle instances
+         * @param minIdle   minimum number of idle instances
+         * @throws IllegalArgumentException if the key is null
          */
         KeyedObjectPoolMinIdleTimerTask(final KeyedObjectPool<K, V> keyedPool,
-                final K key, final int minIdle) throws IllegalArgumentException {
+                                        final K key, final int minIdle) throws IllegalArgumentException {
             if (keyedPool == null) {
                 throw new IllegalArgumentException(
                         MSG_NULL_KEYED_POOL);
@@ -735,17 +694,17 @@ public final class PoolUtils {
          */
         private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
 
-        /** the underlying object pool */
+        /**
+         * the underlying object pool
+         */
         private final ObjectPool<T> pool;
 
         /**
          * Creates a new SynchronizedObjectPool wrapping the given pool.
          *
-         * @param pool
-         *            the ObjectPool to be "wrapped" in a synchronized
-         *            ObjectPool.
-         * @throws IllegalArgumentException
-         *             if the pool is null
+         * @param pool the ObjectPool to be "wrapped" in a synchronized
+         *             ObjectPool.
+         * @throws IllegalArgumentException if the pool is null
          */
         SynchronizedObjectPool(final ObjectPool<T> pool)
                 throws IllegalArgumentException {
@@ -912,16 +871,16 @@ public final class PoolUtils {
          */
         private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
 
-        /** Underlying object pool */
+        /**
+         * Underlying object pool
+         */
         private final KeyedObjectPool<K, V> keyedPool;
 
         /**
          * Creates a new SynchronizedKeyedObjectPool wrapping the given pool
          *
-         * @param keyedPool
-         *            KeyedObjectPool to wrap
-         * @throws IllegalArgumentException
-         *             if keyedPool is null
+         * @param keyedPool KeyedObjectPool to wrap
+         * @throws IllegalArgumentException if keyedPool is null
          */
         SynchronizedKeyedObjectPool(final KeyedObjectPool<K, V> keyedPool)
                 throws IllegalArgumentException {
@@ -1123,20 +1082,22 @@ public final class PoolUtils {
     private static final class SynchronizedPooledObjectFactory<T> implements
             PooledObjectFactory<T> {
 
-        /** Synchronization lock */
+        /**
+         * Synchronization lock
+         */
         private final WriteLock writeLock = new ReentrantReadWriteLock().writeLock();
 
-        /** Wrapped factory */
+        /**
+         * Wrapped factory
+         */
         private final PooledObjectFactory<T> factory;
 
         /**
          * Creates a SynchronizedPoolableObjectFactory wrapping the given
          * factory.
          *
-         * @param factory
-         *            underlying factory to wrap
-         * @throws IllegalArgumentException
-         *             if the factory is null
+         * @param factory underlying factory to wrap
+         * @throws IllegalArgumentException if the factory is null
          */
         SynchronizedPooledObjectFactory(final PooledObjectFactory<T> factory)
                 throws IllegalArgumentException {
@@ -1240,20 +1201,22 @@ public final class PoolUtils {
     private static final class SynchronizedKeyedPooledObjectFactory<K, V>
             implements KeyedPooledObjectFactory<K, V> {
 
-        /** Synchronization lock */
+        /**
+         * Synchronization lock
+         */
         private final WriteLock writeLock = new ReentrantReadWriteLock().writeLock();
 
-        /** Wrapped factory */
+        /**
+         * Wrapped factory
+         */
         private final KeyedPooledObjectFactory<K, V> keyedFactory;
 
         /**
          * Creates a SynchronizedKeyedPoolableObjectFactory wrapping the given
          * factory.
          *
-         * @param keyedFactory
-         *            underlying factory to wrap
-         * @throws IllegalArgumentException
-         *             if the factory is null
+         * @param keyedFactory underlying factory to wrap
+         * @throws IllegalArgumentException if the factory is null
          */
         SynchronizedKeyedPooledObjectFactory(
                 final KeyedPooledObjectFactory<K, V> keyedFactory)
@@ -1354,39 +1317,42 @@ public final class PoolUtils {
      * frequently.
      */
     private static final class ErodingFactor {
-        /** Determines frequency of "erosion" events */
+        /**
+         * Determines frequency of "erosion" events
+         */
         private final float factor;
 
-        /** Time of next shrink event */
+        /**
+         * Time of next shrink event
+         */
         private transient volatile long nextShrink;
 
-        /** High water mark - largest numIdle encountered */
+        /**
+         * High water mark - largest numIdle encountered
+         */
         private transient volatile int idleHighWaterMark;
 
         /**
          * Creates a new ErodingFactor with the given erosion factor.
          *
-         * @param factor
-         *            erosion factor
+         * @param factor erosion factor
          */
         public ErodingFactor(final float factor) {
             this.factor = factor;
             nextShrink = System.currentTimeMillis() + (long) (900000 * factor); // now
-                                                                                // +
-                                                                                // 15
-                                                                                // min
-                                                                                // *
-                                                                                // factor
+            // +
+            // 15
+            // min
+            // *
+            // factor
             idleHighWaterMark = 1;
         }
 
         /**
          * Updates internal state using the supplied time and numIdle.
          *
-         * @param now
-         *            current time
-         * @param numIdle
-         *            number of idle elements in the pool
+         * @param now     current time
+         * @param numIdle number of idle elements in the pool
          */
         public void update(final long now, final int numIdle) {
             final int idle = Math.max(0, numIdle);
@@ -1425,21 +1391,23 @@ public final class PoolUtils {
      */
     private static class ErodingObjectPool<T> implements ObjectPool<T> {
 
-        /** Underlying object pool */
+        /**
+         * Underlying object pool
+         */
         private final ObjectPool<T> pool;
 
-        /** Erosion factor */
+        /**
+         * Erosion factor
+         */
         private final ErodingFactor factor;
 
         /**
          * Creates an ErodingObjectPool wrapping the given pool using the
          * specified erosion factor.
          *
-         * @param pool
-         *            underlying pool
-         * @param factor
-         *            erosion factor - determines the frequency of erosion
-         *            events
+         * @param pool   underlying pool
+         * @param factor erosion factor - determines the frequency of erosion
+         *               events
          * @see #factor
          */
         public ErodingObjectPool(final ObjectPool<T> pool, final float factor) {
@@ -1463,8 +1431,7 @@ public final class PoolUtils {
          * factor}-determined time has elapsed since the last returnObject
          * activation.
          *
-         * @param obj
-         *            object to return or invalidate
+         * @param obj object to return or invalidate
          * @see #factor
          */
         @Override
@@ -1473,7 +1440,7 @@ public final class PoolUtils {
             final long now = System.currentTimeMillis();
             synchronized (pool) {
                 if (factor.getNextShrink() < now) { // XXX: Pool 3: move test
-                                                    // out of sync block
+                    // out of sync block
                     final int numIdle = pool.getNumIdle();
                     if (numIdle > 0) {
                         discard = true;
@@ -1571,25 +1538,27 @@ public final class PoolUtils {
     private static class ErodingKeyedObjectPool<K, V> implements
             KeyedObjectPool<K, V> {
 
-        /** Underlying pool */
+        /**
+         * Underlying pool
+         */
         private final KeyedObjectPool<K, V> keyedPool;
 
-        /** Erosion factor */
+        /**
+         * Erosion factor
+         */
         private final ErodingFactor erodingFactor;
 
         /**
          * Creates an ErodingObjectPool wrapping the given pool using the
          * specified erosion factor.
          *
-         * @param keyedPool
-         *            underlying pool
-         * @param factor
-         *            erosion factor - determines the frequency of erosion
-         *            events
+         * @param keyedPool underlying pool
+         * @param factor    erosion factor - determines the frequency of erosion
+         *                  events
          * @see #erodingFactor
          */
         public ErodingKeyedObjectPool(final KeyedObjectPool<K, V> keyedPool,
-                final float factor) {
+                                      final float factor) {
             this(keyedPool, new ErodingFactor(factor));
         }
 
@@ -1597,15 +1566,13 @@ public final class PoolUtils {
          * Creates an ErodingObjectPool wrapping the given pool using the
          * specified erosion factor.
          *
-         * @param keyedPool
-         *            underlying pool - must not be null
-         * @param erodingFactor
-         *            erosion factor - determines the frequency of erosion
-         *            events
+         * @param keyedPool     underlying pool - must not be null
+         * @param erodingFactor erosion factor - determines the frequency of erosion
+         *                      events
          * @see #erodingFactor
          */
         protected ErodingKeyedObjectPool(final KeyedObjectPool<K, V> keyedPool,
-                final ErodingFactor erodingFactor) {
+                                         final ErodingFactor erodingFactor) {
             if (keyedPool == null) {
                 throw new IllegalArgumentException(
                         MSG_NULL_KEYED_POOL);
@@ -1630,10 +1597,8 @@ public final class PoolUtils {
          * configured {@link #erodingFactor erosion factor} time has elapsed
          * since the last returnObject activation.
          *
-         * @param obj
-         *            object to return or invalidate
-         * @param key
-         *            key
+         * @param obj object to return or invalidate
+         * @param key key
          * @see #erodingFactor
          */
         @Override
@@ -1665,8 +1630,7 @@ public final class PoolUtils {
         /**
          * Returns the eroding factor for the given key
          *
-         * @param key
-         *            key
+         * @param key key
          * @return eroding factor for the given keyed pool
          */
         protected ErodingFactor getErodingFactor(final K key) {
@@ -1785,20 +1749,22 @@ public final class PoolUtils {
     private static final class ErodingPerKeyKeyedObjectPool<K, V> extends
             ErodingKeyedObjectPool<K, V> {
 
-        /** Erosion factor - same for all pools */
+        /**
+         * Erosion factor - same for all pools
+         */
         private final float factor;
 
-        /** Map of ErodingFactor instances keyed on pool keys */
+        /**
+         * Map of ErodingFactor instances keyed on pool keys
+         */
         private final Map<K, ErodingFactor> factors = Collections.synchronizedMap(new HashMap<K, ErodingFactor>());
 
         /**
          * Creates a new ErordingPerKeyKeyedObjectPool decorating the given keyed
          * pool with the specified erosion factor.
          *
-         * @param keyedPool
-         *            underlying keyed pool
-         * @param factor
-         *            erosion factor
+         * @param keyedPool underlying keyed pool
+         * @param factor    erosion factor
          */
         public ErodingPerKeyKeyedObjectPool(
                 final KeyedObjectPool<K, V> keyedPool, final float factor) {

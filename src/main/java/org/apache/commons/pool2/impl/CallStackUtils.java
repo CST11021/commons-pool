@@ -29,7 +29,7 @@ public final class CallStackUtils {
      * Returns whether the caller can create a security manager in the current environment.
      *
      * @return {@code true} if it is able to create a security manager in the current environment, {@code false}
-     *         otherwise.
+     * otherwise.
      */
     private static boolean canCreateSecurityManager() {
         final SecurityManager manager = System.getSecurityManager();
@@ -73,8 +73,8 @@ public final class CallStackUtils {
                                          final boolean useTimestamp,
                                          final boolean requireFullStackTrace) {
         return canCreateSecurityManager() && !requireFullStackTrace ?
-            new SecurityManagerCallStack(messageFormat, useTimestamp) :
-            new ThrowableCallStack(messageFormat, useTimestamp);
+                new SecurityManagerCallStack(messageFormat, useTimestamp) :
+                new ThrowableCallStack(messageFormat, useTimestamp);
     }
 
     /**

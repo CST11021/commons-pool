@@ -25,7 +25,6 @@ import org.apache.commons.pool2.UsageTracking;
  * Provides proxy objects using CGLib.
  *
  * @param <T> type of the pooled object to be proxied
- *
  * @since 2.0
  */
 public class CglibProxySource<T> implements ProxySource<T> {
@@ -50,9 +49,7 @@ public class CglibProxySource<T> implements ProxySource<T> {
                 new CglibProxyHandler<>(pooledObject, usageTracking);
         enhancer.setCallback(proxyInterceptor);
 
-        @SuppressWarnings("unchecked")
-        final
-        T proxy = (T) enhancer.create();
+        @SuppressWarnings("unchecked") final T proxy = (T) enhancer.create();
 
         return proxy;
     }
@@ -60,9 +57,7 @@ public class CglibProxySource<T> implements ProxySource<T> {
 
     @Override
     public T resolveProxy(final T proxy) {
-        @SuppressWarnings("unchecked")
-        final
-        CglibProxyHandler<T> cglibProxyHandler =
+        @SuppressWarnings("unchecked") final CglibProxyHandler<T> cglibProxyHandler =
                 (CglibProxyHandler<T>) ((Factory) proxy).getCallback(0);
         final T pooledObject = cglibProxyHandler.disableProxy();
         return pooledObject;

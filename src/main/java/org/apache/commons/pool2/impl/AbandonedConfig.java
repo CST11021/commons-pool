@@ -55,7 +55,7 @@ public class AbandonedConfig {
      * removeAbandonedTimeout when borrowObject is invoked.</p>
      *
      * @param removeAbandonedOnBorrow true means abandoned objects will be
-     *   removed by borrowObject
+     *                                removed by borrowObject
      * @see #getRemoveAbandonedOnBorrow()
      */
     public void setRemoveAbandonedOnBorrow(final boolean removeAbandonedOnBorrow) {
@@ -78,7 +78,7 @@ public class AbandonedConfig {
      * <p>If set to true, abandoned objects are removed by the pool
      * maintenance thread when it runs.  This setting has no effect
      * unless maintenance is enabled by setting
-     *{@link GenericObjectPool#getTimeBetweenEvictionRunsMillis() timeBetweenEvictionRunsMillis}
+     * {@link GenericObjectPool#getTimeBetweenEvictionRunsMillis() timeBetweenEvictionRunsMillis}
      * to a positive number.</p>
      *
      * @return true if abandoned objects are to be removed by the evictor
@@ -92,7 +92,7 @@ public class AbandonedConfig {
      * removeAbandonedTimeout when pool maintenance runs.</p>
      *
      * @param removeAbandonedOnMaintenance true means abandoned objects will be
-     *   removed by pool maintenance
+     *                                     removed by pool maintenance
      * @see #getRemoveAbandonedOnMaintenance
      */
     public void setRemoveAbandonedOnMaintenance(final boolean removeAbandonedOnMaintenance) {
@@ -144,14 +144,13 @@ public class AbandonedConfig {
     /**
      * Flag to log stack traces for application code which abandoned
      * an object.
-     *
+     * <p>
      * Defaults to false.
      * Logging of abandoned objects adds overhead for every object created
      * because a stack trace has to be generated.
      *
      * @return boolean true if stack trace logging is turned on for abandoned
      * objects
-     *
      */
     public boolean getLogAbandoned() {
         return this.logAbandoned;
@@ -163,7 +162,6 @@ public class AbandonedConfig {
      *
      * @param logAbandoned true turns on abandoned stack trace logging
      * @see #getLogAbandoned()
-     *
      */
     public void setLogAbandoned(final boolean logAbandoned) {
         this.logAbandoned = logAbandoned;
@@ -257,9 +255,9 @@ public class AbandonedConfig {
      * object and retain the most recent stack trace to aid debugging of
      * abandoned objects.
      *
-     * @param   useUsageTracking    A value of <code>true</code> will enable
-     *                              the recording of a stack trace on every use
-     *                              of a pooled object
+     * @param useUsageTracking A value of <code>true</code> will enable
+     *                         the recording of a stack trace on every use
+     *                         of a pooled object
      */
     public void setUseUsageTracking(final boolean useUsageTracking) {
         this.useUsageTracking = useUsageTracking;

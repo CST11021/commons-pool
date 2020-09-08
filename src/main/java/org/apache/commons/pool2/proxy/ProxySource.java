@@ -23,7 +23,6 @@ import org.apache.commons.pool2.UsageTracking;
  * {@link ProxiedObjectPool} to create proxies as required.
  *
  * @param <T> type of the pooled object to be proxied
- *
  * @since 2.0
  */
 interface ProxySource<T> {
@@ -35,7 +34,6 @@ interface ProxySource<T> {
      * @param usageTracking The instance, if any (usually the object pool) to
      *                      be provided with usage tracking information for this
      *                      wrapped object
-     *
      * @return the new proxy object
      */
     T createProxy(T pooledObject, UsageTracking<T> usageTracking);
@@ -44,7 +42,6 @@ interface ProxySource<T> {
      * Obtain the wrapped object from the given proxy.
      *
      * @param proxy The proxy object
-     *
      * @return The pooled object wrapped by the given proxy
      */
     T resolveProxy(T proxy);

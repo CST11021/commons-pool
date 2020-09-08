@@ -28,7 +28,6 @@ import org.apache.commons.pool2.UsageTracking;
  * object to the pool.
  *
  * @param <T> type of the pooled object
- *
  * @since 2.0
  */
 public class ProxiedObjectPool<T> implements ObjectPool<T> {
@@ -40,7 +39,7 @@ public class ProxiedObjectPool<T> implements ObjectPool<T> {
     /**
      * Create a new proxied object pool.
      *
-     * @param pool  The object pool to wrap
+     * @param pool        The object pool to wrap
      * @param proxySource The source of the proxy objects
      */
     public ProxiedObjectPool(final ObjectPool<T> pool, final ProxySource<T> proxySource) {

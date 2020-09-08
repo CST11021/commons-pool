@@ -24,35 +24,35 @@ package org.apache.commons.pool2;
  * delegates to a {@link KeyedPooledObjectFactory},
  * </p>
  * <ol>
- *  <li>
- *   {@link #makeObject} is called whenever a new instance is needed.
- *  </li>
- *  <li>
- *   {@link #activateObject} is invoked on every instance that has been
- *   {@link #passivateObject passivated} before it is
- *   {@link KeyedObjectPool#borrowObject borrowed} from the pool.
- *  </li>
- *  <li>
- *   {@link #validateObject} may be invoked on {@link #activateObject activated}
- *   instances to make sure they can be
- *   {@link KeyedObjectPool#borrowObject borrowed} from the pool.
- *   <code>validateObject</code> may also be used to test an
- *   instance being {@link KeyedObjectPool#returnObject returned} to the pool
- *   before it is {@link #passivateObject passivated}. It will only be invoked
- *   on an activated instance.
- *  </li>
- *  <li>
- *   {@link #passivateObject passivateObject}
- *   is invoked on every instance when it is returned to the pool.
- *  </li>
- *  <li>
- *   {@link #destroyObject destroyObject}
- *   is invoked on every instance when it is being "dropped" from the
- *   pool (whether due to the response from <code>validateObject</code>,
- *   or for reasons specific to the pool implementation.) There is no
- *   guarantee that the instance being destroyed will
- *   be considered active, passive or in a generally consistent state.
- *  </li>
+ * <li>
+ * {@link #makeObject} is called whenever a new instance is needed.
+ * </li>
+ * <li>
+ * {@link #activateObject} is invoked on every instance that has been
+ * {@link #passivateObject passivated} before it is
+ * {@link KeyedObjectPool#borrowObject borrowed} from the pool.
+ * </li>
+ * <li>
+ * {@link #validateObject} may be invoked on {@link #activateObject activated}
+ * instances to make sure they can be
+ * {@link KeyedObjectPool#borrowObject borrowed} from the pool.
+ * <code>validateObject</code> may also be used to test an
+ * instance being {@link KeyedObjectPool#returnObject returned} to the pool
+ * before it is {@link #passivateObject passivated}. It will only be invoked
+ * on an activated instance.
+ * </li>
+ * <li>
+ * {@link #passivateObject passivateObject}
+ * is invoked on every instance when it is returned to the pool.
+ * </li>
+ * <li>
+ * {@link #destroyObject destroyObject}
+ * is invoked on every instance when it is being "dropped" from the
+ * pool (whether due to the response from <code>validateObject</code>,
+ * or for reasons specific to the pool implementation.) There is no
+ * guarantee that the instance being destroyed will
+ * be considered active, passive or in a generally consistent state.
+ * </li>
  * </ol>
  * {@link KeyedPooledObjectFactory} must be thread-safe. The only promise
  * an {@link KeyedObjectPool} makes is that the same instance of an object will
@@ -66,12 +66,10 @@ package org.apache.commons.pool2;
  * they manage.
  * </p>
  *
- * @see KeyedObjectPool
- * @see BaseKeyedPooledObjectFactory
- *
  * @param <K> The type of keys managed by this factory.
  * @param <V> Type of element managed by this factory.
- *
+ * @see KeyedObjectPool
+ * @see BaseKeyedPooledObjectFactory
  * @since 2.0
  */
 public interface KeyedPooledObjectFactory<K, V> {
@@ -81,12 +79,10 @@ public interface KeyedPooledObjectFactory<K, V> {
      * wrap it in a {@link PooledObject} to be managed by the pool.
      *
      * @param key the key used when constructing the object
-     *
      * @return a {@code PooledObject} wrapping an instance that can
      * be served by the pool.
-     *
      * @throws Exception if there is a problem creating a new instance,
-     *    this will be propagated to the code requesting an object.
+     *                   this will be propagated to the code requesting an object.
      */
     PooledObject<V> makeObject(K key) throws Exception;
 
@@ -103,11 +99,9 @@ public interface KeyedPooledObjectFactory<K, V> {
      * </p>
      *
      * @param key the key used when selecting the instance
-     * @param p a {@code PooledObject} wrapping the instance to be destroyed
-     *
+     * @param p   a {@code PooledObject} wrapping the instance to be destroyed
      * @throws Exception should be avoided as it may be swallowed by
-     *    the pool implementation.
-     *
+     *                   the pool implementation.
      * @see #validateObject
      * @see KeyedObjectPool#invalidateObject
      */
@@ -117,10 +111,9 @@ public interface KeyedPooledObjectFactory<K, V> {
      * Ensures that the instance is safe to be returned by the pool.
      *
      * @param key the key used when selecting the object
-     * @param p a {@code PooledObject} wrapping the instance to be validated
-     *
+     * @param p   a {@code PooledObject} wrapping the instance to be validated
      * @return <code>false</code> if <code>obj</code> is not valid and should
-     *         be dropped from the pool, <code>true</code> otherwise.
+     * be dropped from the pool, <code>true</code> otherwise.
      */
     boolean validateObject(K key, PooledObject<V> p);
 
@@ -128,11 +121,9 @@ public interface KeyedPooledObjectFactory<K, V> {
      * Reinitialize an instance to be returned by the pool.
      *
      * @param key the key used when selecting the object
-     * @param p a {@code PooledObject} wrapping the instance to be activated
-     *
+     * @param p   a {@code PooledObject} wrapping the instance to be activated
      * @throws Exception if there is a problem activating <code>obj</code>,
-     *    this exception may be swallowed by the pool.
-     *
+     *                   this exception may be swallowed by the pool.
      * @see #destroyObject
      */
     void activateObject(K key, PooledObject<V> p) throws Exception;
@@ -141,11 +132,9 @@ public interface KeyedPooledObjectFactory<K, V> {
      * Uninitialize an instance to be returned to the idle object pool.
      *
      * @param key the key used when selecting the object
-     * @param p a {@code PooledObject} wrapping the instance to be passivated
-     *
+     * @param p   a {@code PooledObject} wrapping the instance to be passivated
      * @throws Exception if there is a problem passivating <code>obj</code>,
-     *    this exception may be swallowed by the pool.
-     *
+     *                   this exception may be swallowed by the pool.
      * @see #destroyObject
      */
     void passivateObject(K key, PooledObject<V> p) throws Exception;

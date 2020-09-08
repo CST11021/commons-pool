@@ -25,7 +25,6 @@ package org.apache.commons.pool2;
  * </p>
  *
  * @param <T> Type of element pooled in this pool.
- *
  * @since 2.0
  */
 public abstract class BaseObjectPool<T> extends BaseObject implements ObjectPool<T> {
@@ -63,7 +62,7 @@ public abstract class BaseObjectPool<T> extends BaseObject implements ObjectPool
      * Not supported in this base implementation.
      *
      * @throws UnsupportedOperationException if the pool does not implement this
-     *          method
+     *                                       method
      */
     @Override
     public void clear() throws Exception, UnsupportedOperationException {
@@ -75,7 +74,7 @@ public abstract class BaseObjectPool<T> extends BaseObject implements ObjectPool
      * this behavior.
      *
      * @throws UnsupportedOperationException if the pool does not implement this
-     *          method
+     *                                       method
      */
     @Override
     public void addObject() throws Exception, UnsupportedOperationException {
@@ -108,7 +107,6 @@ public abstract class BaseObjectPool<T> extends BaseObject implements ObjectPool
      * closed.
      *
      * @throws IllegalStateException when this pool has been closed.
-     *
      * @see #isClosed()
      */
     protected final void assertOpen() throws IllegalStateException {

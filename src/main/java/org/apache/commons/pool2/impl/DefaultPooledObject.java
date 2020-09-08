@@ -31,7 +31,6 @@ import java.util.Deque;
  * </p>
  *
  * @param <T> the type of object in the pool
- *
  * @since 2.0
  */
 public class DefaultPooledObject<T> implements PooledObject<T> {
@@ -100,6 +99,7 @@ public class DefaultPooledObject<T> implements PooledObject<T> {
 
     /**
      * Gets the number of times this object has been borrowed.
+     *
      * @return The number of times this object has been borrowed.
      * @since 2.1
      */
@@ -136,7 +136,7 @@ public class DefaultPooledObject<T> implements PooledObject<T> {
             return System.identityHashCode(this) - System.identityHashCode(other);
         }
         // handle int overflow
-        return (int)Math.min(Math.max(lastActiveDiff, Integer.MIN_VALUE), Integer.MAX_VALUE);
+        return (int) Math.min(Math.max(lastActiveDiff, Integer.MIN_VALUE), Integer.MAX_VALUE);
     }
 
     @Override
@@ -248,6 +248,7 @@ public class DefaultPooledObject<T> implements PooledObject<T> {
 
     /**
      * Returns the state of this object.
+     *
      * @return state
      */
     @Override
@@ -289,10 +290,10 @@ public class DefaultPooledObject<T> implements PooledObject<T> {
     @Override
     public void setRequireFullStackTrace(final boolean requireFullStackTrace) {
         borrowedBy = CallStackUtils.newCallStack("'Pooled object created' " +
-            "yyyy-MM-dd HH:mm:ss Z 'by the following code has not been returned to the pool:'",
-            true, requireFullStackTrace);
+                        "yyyy-MM-dd HH:mm:ss Z 'by the following code has not been returned to the pool:'",
+                true, requireFullStackTrace);
         usedBy = CallStackUtils.newCallStack("The last code to use this object was:",
-            false, requireFullStackTrace);
+                false, requireFullStackTrace);
     }
 
 }

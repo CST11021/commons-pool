@@ -43,10 +43,14 @@ import java.util.concurrent.TimeUnit;
  */
 class EvictionTimer {
 
-    /** Executor instance */
+    /**
+     * Executor instance
+     */
     private static ScheduledThreadPoolExecutor executor; //@GuardedBy("EvictionTimer.class")
 
-    /** Prevents instantiation */
+    /**
+     * Prevents instantiation
+     */
     private EvictionTimer() {
         // Hide the default constructor
     }
@@ -69,9 +73,9 @@ class EvictionTimer {
      * task to prevent memory and/or thread leaks in application server
      * environments.
      *
-     * @param task      Task to be scheduled.
-     * @param delay     Delay in milliseconds before task is executed.
-     * @param period    Time in milliseconds between executions.
+     * @param task   Task to be scheduled.
+     * @param delay  Delay in milliseconds before task is executed.
+     * @param period Time in milliseconds between executions.
      */
     static synchronized void schedule(
             final BaseGenericObjectPool<?>.Evictor task, final long delay, final long period) {
@@ -87,11 +91,11 @@ class EvictionTimer {
     /**
      * Removes the specified eviction task from the timer.
      *
-     * @param evictor   Task to be cancelled.
-     * @param timeout   If the associated executor is no longer required, how
-     *                  long should this thread wait for the executor to
-     *                  terminate?
-     * @param unit      The units for the specified timeout.
+     * @param evictor Task to be cancelled.
+     * @param timeout If the associated executor is no longer required, how
+     *                long should this thread wait for the executor to
+     *                terminate?
+     * @param unit    The units for the specified timeout.
      */
     static synchronized void cancel(
             final BaseGenericObjectPool<?>.Evictor evictor, final long timeout, final TimeUnit unit) {
