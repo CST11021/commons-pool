@@ -97,9 +97,7 @@ public final class PoolUtils {
      *                                  <code>minIdle</code> is negative or when <code>period</code>
      *                                  isn't valid for {@link Timer#schedule(TimerTask, long, long)}
      */
-    public static <T> TimerTask checkMinIdle(final ObjectPool<T> pool,
-                                             final int minIdle, final long period)
-            throws IllegalArgumentException {
+    public static <T> TimerTask checkMinIdle(final ObjectPool<T> pool, final int minIdle, final long period) throws IllegalArgumentException {
         if (pool == null) {
             throw new IllegalArgumentException(MSG_NULL_KEYED_POOL);
         }
@@ -132,10 +130,7 @@ public final class PoolUtils {
      *                                  when <code>period</code> isn't valid for
      *                                  {@link Timer#schedule(TimerTask, long, long)}.
      */
-    public static <K, V> TimerTask checkMinIdle(
-            final KeyedObjectPool<K, V> keyedPool, final K key,
-            final int minIdle, final long period)
-            throws IllegalArgumentException {
+    public static <K, V> TimerTask checkMinIdle(final KeyedObjectPool<K, V> keyedPool, final K key, final int minIdle, final long period) throws IllegalArgumentException {
         if (keyedPool == null) {
             throw new IllegalArgumentException(MSG_NULL_KEYED_POOL);
         }
@@ -173,10 +168,7 @@ public final class PoolUtils {
      *                                  .
      * @see #checkMinIdle(KeyedObjectPool, Object, int, long)
      */
-    public static <K, V> Map<K, TimerTask> checkMinIdle(
-            final KeyedObjectPool<K, V> keyedPool, final Collection<K> keys,
-            final int minIdle, final long period)
-            throws IllegalArgumentException {
+    public static <K, V> Map<K, TimerTask> checkMinIdle(final KeyedObjectPool<K, V> keyedPool, final Collection<K> keys, final int minIdle, final long period) throws IllegalArgumentException {
         if (keys == null) {
             throw new IllegalArgumentException(MSG_NULL_KEYS);
         }
@@ -202,8 +194,7 @@ public final class PoolUtils {
      * @deprecated Use {@link ObjectPool#addObjects(int)}.
      */
     @Deprecated
-    public static <T> void prefill(final ObjectPool<T> pool, final int count)
-            throws Exception, IllegalArgumentException {
+    public static <T> void prefill(final ObjectPool<T> pool, final int count) throws Exception, IllegalArgumentException {
         if (pool == null) {
             throw new IllegalArgumentException(MSG_NULL_POOL);
         }
@@ -225,9 +216,7 @@ public final class PoolUtils {
      * @deprecated Use {@link KeyedObjectPool#addObjects(Object, int)}.
      */
     @Deprecated
-    public static <K, V> void prefill(final KeyedObjectPool<K, V> keyedPool,
-                                      final K key, final int count) throws Exception,
-            IllegalArgumentException {
+    public static <K, V> void prefill(final KeyedObjectPool<K, V> keyedPool, final K key, final int count) throws Exception, IllegalArgumentException {
         if (keyedPool == null) {
             throw new IllegalArgumentException(MSG_NULL_KEYED_POOL);
         }
@@ -252,9 +241,7 @@ public final class PoolUtils {
      * @deprecated Use {@link KeyedObjectPool#addObjects(Collection, int)}.
      */
     @Deprecated
-    public static <K, V> void prefill(final KeyedObjectPool<K, V> keyedPool,
-                                      final Collection<K> keys, final int count) throws Exception,
-            IllegalArgumentException {
+    public static <K, V> void prefill(final KeyedObjectPool<K, V> keyedPool, final Collection<K> keys, final int count) throws Exception, IllegalArgumentException {
         if (keys == null) {
             throw new IllegalArgumentException(MSG_NULL_KEYS);
         }
@@ -313,8 +300,7 @@ public final class PoolUtils {
      * @param <V>       the type of pool entries
      * @return a synchronized view of the specified KeyedObjectPool.
      */
-    public static <K, V> KeyedObjectPool<K, V> synchronizedPool(
-            final KeyedObjectPool<K, V> keyedPool) {
+    public static <K, V> KeyedObjectPool<K, V> synchronizedPool(final KeyedObjectPool<K, V> keyedPool) {
         /*
          * assert !(keyedPool instanceof GenericKeyedObjectPool) :
          * "GenericKeyedObjectPool is already thread-safe"; assert !(keyedPool
@@ -336,8 +322,7 @@ public final class PoolUtils {
      * @param <T>     the type of objects in the pool
      * @return a synchronized view of the specified PooledObjectFactory.
      */
-    public static <T> PooledObjectFactory<T> synchronizedPooledFactory(
-            final PooledObjectFactory<T> factory) {
+    public static <T> PooledObjectFactory<T> synchronizedPooledFactory(final PooledObjectFactory<T> factory) {
         return new SynchronizedPooledObjectFactory<>(factory);
     }
 
@@ -351,8 +336,7 @@ public final class PoolUtils {
      * @param <V>          the type of pool entries
      * @return a synchronized view of the specified KeyedPooledObjectFactory.
      */
-    public static <K, V> KeyedPooledObjectFactory<K, V> synchronizedKeyedPooledFactory(
-            final KeyedPooledObjectFactory<K, V> keyedFactory) {
+    public static <K, V> KeyedPooledObjectFactory<K, V> synchronizedKeyedPooledFactory(final KeyedPooledObjectFactory<K, V> keyedFactory) {
         return new SynchronizedKeyedPooledObjectFactory<>(keyedFactory);
     }
 
@@ -398,8 +382,7 @@ public final class PoolUtils {
      * no longer needed.
      * @see #erodingPool(ObjectPool)
      */
-    public static <T> ObjectPool<T> erodingPool(final ObjectPool<T> pool,
-                                                final float factor) {
+    public static <T> ObjectPool<T> erodingPool(final ObjectPool<T> pool, final float factor) {
         if (pool == null) {
             throw new IllegalArgumentException(MSG_NULL_POOL);
         }
@@ -425,8 +408,7 @@ public final class PoolUtils {
      * @see #erodingPool(KeyedObjectPool, float)
      * @see #erodingPool(KeyedObjectPool, float, boolean)
      */
-    public static <K, V> KeyedObjectPool<K, V> erodingPool(
-            final KeyedObjectPool<K, V> keyedPool) {
+    public static <K, V> KeyedObjectPool<K, V> erodingPool(final KeyedObjectPool<K, V> keyedPool) {
         return erodingPool(keyedPool, 1f);
     }
 
@@ -455,8 +437,7 @@ public final class PoolUtils {
      * no longer needed.
      * @see #erodingPool(KeyedObjectPool, float, boolean)
      */
-    public static <K, V> KeyedObjectPool<K, V> erodingPool(
-            final KeyedObjectPool<K, V> keyedPool, final float factor) {
+    public static <K, V> KeyedObjectPool<K, V> erodingPool(final KeyedObjectPool<K, V> keyedPool, final float factor) {
         return erodingPool(keyedPool, factor, false);
     }
 
@@ -493,9 +474,7 @@ public final class PoolUtils {
      * @see #erodingPool(KeyedObjectPool)
      * @see #erodingPool(KeyedObjectPool, float)
      */
-    public static <K, V> KeyedObjectPool<K, V> erodingPool(
-            final KeyedObjectPool<K, V> keyedPool, final float factor,
-            final boolean perKey) {
+    public static <K, V> KeyedObjectPool<K, V> erodingPool(final KeyedObjectPool<K, V> keyedPool, final float factor, final boolean perKey) {
         if (keyedPool == null) {
             throw new IllegalArgumentException(MSG_NULL_KEYED_POOL);
         }
@@ -597,8 +576,7 @@ public final class PoolUtils {
      * @param <K> object pool key type
      * @param <V> object pool value type
      */
-    private static final class KeyedObjectPoolMinIdleTimerTask<K, V> extends
-            TimerTask {
+    private static final class KeyedObjectPoolMinIdleTimerTask<K, V> extends TimerTask {
 
         /**
          * Minimum number of idle instances. Not the same as pool.getMinIdle().
@@ -862,8 +840,7 @@ public final class PoolUtils {
      * @param <K> object pool key type
      * @param <V> object pool value type
      */
-    private static final class SynchronizedKeyedObjectPool<K, V> implements
-            KeyedObjectPool<K, V> {
+    private static final class SynchronizedKeyedObjectPool<K, V> implements KeyedObjectPool<K, V> {
 
         /**
          * Object whose monitor is used to synchronize methods on the wrapped
@@ -1068,28 +1045,18 @@ public final class PoolUtils {
     }
 
     /**
-     * A fully synchronized PooledObjectFactory that wraps a
-     * PooledObjectFactory and synchronizes access to the wrapped factory
-     * methods.
-     * <p>
-     * <b>Note:</b> This should not be used on pool implementations that already
-     * provide proper synchronization such as the pools provided in the Commons
-     * Pool library.
-     * </p>
+     * 同步的PooledObjectFactory实现
      *
      * @param <T> pooled object factory type
      */
-    private static final class SynchronizedPooledObjectFactory<T> implements
-            PooledObjectFactory<T> {
+    private static final class SynchronizedPooledObjectFactory<T> implements PooledObjectFactory<T> {
 
         /**
          * Synchronization lock
          */
         private final WriteLock writeLock = new ReentrantReadWriteLock().writeLock();
 
-        /**
-         * Wrapped factory
-         */
+        /** 用于创建对象的工厂 */
         private final PooledObjectFactory<T> factory;
 
         /**
@@ -1099,8 +1066,7 @@ public final class PoolUtils {
          * @param factory underlying factory to wrap
          * @throws IllegalArgumentException if the factory is null
          */
-        SynchronizedPooledObjectFactory(final PooledObjectFactory<T> factory)
-                throws IllegalArgumentException {
+        SynchronizedPooledObjectFactory(final PooledObjectFactory<T> factory) throws IllegalArgumentException {
             if (factory == null) {
                 throw new IllegalArgumentException("factory must not be null.");
             }
@@ -1198,8 +1164,7 @@ public final class PoolUtils {
      * @param <K> pooled object factory key type
      * @param <V> pooled object factory key value
      */
-    private static final class SynchronizedKeyedPooledObjectFactory<K, V>
-            implements KeyedPooledObjectFactory<K, V> {
+    private static final class SynchronizedKeyedPooledObjectFactory<K, V> implements KeyedPooledObjectFactory<K, V> {
 
         /**
          * Synchronization lock
@@ -1535,8 +1500,7 @@ public final class PoolUtils {
      * @param <K> object pool key type
      * @param <V> object pool value type
      */
-    private static class ErodingKeyedObjectPool<K, V> implements
-            KeyedObjectPool<K, V> {
+    private static class ErodingKeyedObjectPool<K, V> implements KeyedObjectPool<K, V> {
 
         /**
          * Underlying pool
@@ -1746,8 +1710,7 @@ public final class PoolUtils {
      * @param <K> object pool key type
      * @param <V> object pool value type
      */
-    private static final class ErodingPerKeyKeyedObjectPool<K, V> extends
-            ErodingKeyedObjectPool<K, V> {
+    private static final class ErodingPerKeyKeyedObjectPool<K, V> extends ErodingKeyedObjectPool<K, V> {
 
         /**
          * Erosion factor - same for all pools

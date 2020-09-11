@@ -58,21 +58,16 @@ import java.util.NoSuchElementException;
 public interface ObjectPool<T> extends Closeable {
 
     /**
-     * Creates an object using the {@link PooledObjectFactory factory} or other
-     * implementation dependent mechanism, passivate it, and then place it in
-     * the idle object pool. <code>addObject</code> is useful for "pre-loading"
-     * a pool with idle objects. (Optional operation).
+     * 创建一个对象，并放到对象池
      *
      * @throws Exception                     when {@link PooledObjectFactory#makeObject} fails.
      * @throws IllegalStateException         after {@link #close} has been called on this pool.
      * @throws UnsupportedOperationException when this pool cannot add new idle objects.
      */
-    void addObject() throws Exception, IllegalStateException,
-            UnsupportedOperationException;
+    void addObject() throws Exception, IllegalStateException, UnsupportedOperationException;
 
     /**
-     * Calls {@link ObjectPool#addObject()} <code>count</code>
-     * number of times.
+     * 创建指定数量的对象，并放到对象池
      *
      * @param count the number of idle objects to add.
      * @throws Exception when {@link ObjectPool#addObject()} fails.
@@ -85,13 +80,10 @@ public interface ObjectPool<T> extends Closeable {
     }
 
     /**
-     * Obtains an instance from this pool.
-     * <p>
-     * Instances returned from this method will have been either newly created
-     * with {@link PooledObjectFactory#makeObject} or will be a previously
-     * idle object and have been activated with
-     * {@link PooledObjectFactory#activateObject} and then validated with
-     * {@link PooledObjectFactory#validateObject}.
+     * 从该池获取一个对象实例
+     *
+     * Instances returned from this method will have been either newly created with {@link PooledObjectFactory#makeObject} or will be a previously
+     * idle object and have been activated with {@link PooledObjectFactory#activateObject} and then validated with {@link PooledObjectFactory#validateObject}.
      * </p>
      * <p>
      * By contract, clients <strong>must</strong> return the borrowed instance
@@ -111,13 +103,10 @@ public interface ObjectPool<T> extends Closeable {
      * @throws NoSuchElementException when the pool is exhausted and cannot or will not return
      *                                another instance.
      */
-    T borrowObject() throws Exception, NoSuchElementException,
-            IllegalStateException;
+    T borrowObject() throws Exception, NoSuchElementException, IllegalStateException;
 
     /**
-     * Clears any objects sitting idle in the pool, releasing any associated
-     * resources (optional operation). Idle objects cleared must be
-     * {@link PooledObjectFactory#destroyObject(PooledObject)}.
+     * 清除池中空闲的所有对象，释放任何关联的资源（可选操作）。清除的空闲对象必须为{@link PooledObjectFactory#destroyObject(PooledObject)}
      *
      * @throws UnsupportedOperationException if this implementation does not support the operation
      * @throws Exception                     if the pool cannot be cleared
@@ -138,34 +127,21 @@ public interface ObjectPool<T> extends Closeable {
     void close();
 
     /**
-     * Returns the number of instances currently borrowed from this pool. Returns
-     * a negative value if this information is not available.
+     * 获得被借出对象数量，如果该池处于非活动状态，则为-1
      *
      * @return the number of instances currently borrowed from this pool.
      */
     int getNumActive();
 
     /**
-     * Returns the number of instances currently idle in this pool. This may be
-     * considered an approximation of the number of objects that can be
-     * {@link #borrowObject borrowed} without creating any new instances.
-     * Returns a negative value if this information is not available.
+     * 当前在该池中空闲的实例数，如果该池处于非活动状态，则为-1
      *
      * @return the number of instances currently idle in this pool.
      */
     int getNumIdle();
 
     /**
-     * Invalidates an object from the pool.
-     * <p>
-     * By contract, <code>obj</code> <strong>must</strong> have been obtained
-     * using {@link #borrowObject} or a related method as defined in an
-     * implementation or sub-interface.
-     * </p>
-     * <p>
-     * This method should be used when an object that has been borrowed is
-     * determined (due to an exception or other problem) to be invalid.
-     * </p>
+     * 使池中的该对象实例无效
      *
      * @param obj a {@link #borrowObject borrowed} instance to be disposed.
      * @throws Exception if the instance cannot be invalidated
@@ -173,9 +149,7 @@ public interface ObjectPool<T> extends Closeable {
     void invalidateObject(T obj) throws Exception;
 
     /**
-     * Returns an instance to the pool. By contract, <code>obj</code>
-     * <strong>must</strong> have been obtained using {@link #borrowObject()} or
-     * a related method as defined in an implementation or sub-interface.
+     * 将实例放回到池中。根据合同，必须使用{@link #borrowObject()}或实现或子接口中定义的相关方法来获取obj。
      *
      * @param obj a {@link #borrowObject borrowed} instance to be returned.
      * @throws IllegalStateException if an attempt is made to return an object to the pool that

@@ -29,8 +29,7 @@ package org.apache.commons.pool2;
 public interface UsageTracking<T> {
 
     /**
-     * This method is called every time a pooled object is used to enable the pool to
-     * better track borrowed objects.
+     * 每次使用池对象来使池更好地跟踪借用对象时，都会调用此方法。
      *
      * @param pooledObject The object that is being used
      */

@@ -31,6 +31,8 @@ import org.apache.commons.pool2.BaseObject;
  */
 public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Cloneable {
 
+    // 常量
+
     /**
      * The default value for the {@code lifo} configuration attribute.
      *
@@ -38,7 +40,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
      * @see GenericKeyedObjectPool#getLifo()
      */
     public static final boolean DEFAULT_LIFO = true;
-
     /**
      * The default value for the {@code fairness} configuration attribute.
      *
@@ -46,7 +47,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
      * @see GenericKeyedObjectPool#getFairness()
      */
     public static final boolean DEFAULT_FAIRNESS = false;
-
     /**
      * The default value for the {@code maxWait} configuration attribute.
      *
@@ -54,7 +54,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
      * @see GenericKeyedObjectPool#getMaxWaitMillis()
      */
     public static final long DEFAULT_MAX_WAIT_MILLIS = -1L;
-
     /**
      * The default value for the {@code minEvictableIdleTimeMillis}
      * configuration attribute.
@@ -62,9 +61,7 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
      * @see GenericObjectPool#getMinEvictableIdleTimeMillis()
      * @see GenericKeyedObjectPool#getMinEvictableIdleTimeMillis()
      */
-    public static final long DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS =
-            1000L * 60L * 30L;
-
+    public static final long DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS = 1000L * 60L * 30L;
     /**
      * The default value for the {@code softMinEvictableIdleTimeMillis}
      * configuration attribute.
@@ -73,7 +70,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
      * @see GenericKeyedObjectPool#getSoftMinEvictableIdleTimeMillis()
      */
     public static final long DEFAULT_SOFT_MIN_EVICTABLE_IDLE_TIME_MILLIS = -1;
-
     /**
      * The default value for {@code evictorShutdownTimeoutMillis} configuration
      * attribute.
@@ -81,9 +77,7 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
      * @see GenericObjectPool#getEvictorShutdownTimeoutMillis()
      * @see GenericKeyedObjectPool#getEvictorShutdownTimeoutMillis()
      */
-    public static final long DEFAULT_EVICTOR_SHUTDOWN_TIMEOUT_MILLIS =
-            10L * 1000L;
-
+    public static final long DEFAULT_EVICTOR_SHUTDOWN_TIMEOUT_MILLIS = 10L * 1000L;
     /**
      * The default value for the {@code numTestsPerEvictionRun} configuration
      * attribute.
@@ -92,7 +86,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
      * @see GenericKeyedObjectPool#getNumTestsPerEvictionRun()
      */
     public static final int DEFAULT_NUM_TESTS_PER_EVICTION_RUN = 3;
-
     /**
      * The default value for the {@code testOnCreate} configuration attribute.
      *
@@ -101,7 +94,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
      * @since 2.2
      */
     public static final boolean DEFAULT_TEST_ON_CREATE = false;
-
     /**
      * The default value for the {@code testOnBorrow} configuration attribute.
      *
@@ -109,7 +101,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
      * @see GenericKeyedObjectPool#getTestOnBorrow()
      */
     public static final boolean DEFAULT_TEST_ON_BORROW = false;
-
     /**
      * The default value for the {@code testOnReturn} configuration attribute.
      *
@@ -117,7 +108,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
      * @see GenericKeyedObjectPool#getTestOnReturn()
      */
     public static final boolean DEFAULT_TEST_ON_RETURN = false;
-
     /**
      * The default value for the {@code testWhileIdle} configuration attribute.
      *
@@ -125,7 +115,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
      * @see GenericKeyedObjectPool#getTestWhileIdle()
      */
     public static final boolean DEFAULT_TEST_WHILE_IDLE = false;
-
     /**
      * The default value for the {@code timeBetweenEvictionRunsMillis}
      * configuration attribute.
@@ -134,7 +123,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
      * @see GenericKeyedObjectPool#getTimeBetweenEvictionRunsMillis()
      */
     public static final long DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS = -1L;
-
     /**
      * The default value for the {@code blockWhenExhausted} configuration
      * attribute.
@@ -143,13 +131,11 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
      * @see GenericKeyedObjectPool#getBlockWhenExhausted()
      */
     public static final boolean DEFAULT_BLOCK_WHEN_EXHAUSTED = true;
-
     /**
      * The default value for enabling JMX for pools created with a configuration
      * instance.
      */
     public static final boolean DEFAULT_JMX_ENABLE = true;
-
     /**
      * The default value for the prefix used to name JMX enabled pools created
      * with a configuration instance.
@@ -158,7 +144,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
      * @see GenericKeyedObjectPool#getJmxName()
      */
     public static final String DEFAULT_JMX_NAME_PREFIX = "pool";
-
     /**
      * The default value for the base name to use to name JMX enabled pools
      * created with a configuration instance. The default is <code>null</code>
@@ -168,7 +153,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
      * @see GenericKeyedObjectPool#getJmxName()
      */
     public static final String DEFAULT_JMX_NAME_BASE = null;
-
     /**
      * The default value for the {@code evictionPolicyClassName} configuration
      * attribute.
@@ -178,40 +162,48 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
      */
     public static final String DEFAULT_EVICTION_POLICY_CLASS_NAME = DefaultEvictionPolicy.class.getName();
 
-    private boolean lifo = DEFAULT_LIFO;
 
+
+
+
+    /** GenericObjectPool 提供了后进先出(LIFO)与先进先出(FIFO)两种行为模式的池。默认为true，即当池中有空闲可用的对象时，调用borrowObject方法会返回最近（后进）的实例 */
+    private boolean lifo = DEFAULT_LIFO;
+    /** 当从池中获取资源或者将资源还回池中时 是否使用java.util.concurrent.locks.ReentrantLock.ReentrantLock 的公平锁机制,默认为false */
     private boolean fairness = DEFAULT_FAIRNESS;
 
+    /** 当对象池资源用尽后，调用者的最大等待时间（单位为毫秒），默认值为-1：表示永远不超时，一直等待，一般不建议使用默认值 */
     private long maxWaitMillis = DEFAULT_MAX_WAIT_MILLIS;
+    /** 当这个值为true的时候，{@link #maxWaitMillis}参数才能生效。为false的时候，当连接池没资源，则立马抛异常。默认为true */
+    private boolean blockWhenExhausted = DEFAULT_BLOCK_WHEN_EXHAUSTED;
 
-    private long minEvictableIdleTimeMillis =
-            DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS;
+    /** 对象的空闲时间，达到此值后空闲的对象将被销毁 */
+    private long minEvictableIdleTimeMillis = DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS;
+    /**  */
+    private long evictorShutdownTimeoutMillis = DEFAULT_EVICTOR_SHUTDOWN_TIMEOUT_MILLIS;
+    /** 连接空闲的最小时间，达到此值后空闲链接将会被移除，且保留minIdle个空闲连接数。默认为-1. */
+    private long softMinEvictableIdleTimeMillis = DEFAULT_SOFT_MIN_EVICTABLE_IDLE_TIME_MILLIS;
+    /** 在每次空闲连接回收器线程(如果有)运行时检查的连接数量，默认为3 */
+    private int numTestsPerEvictionRun = DEFAULT_NUM_TESTS_PER_EVICTION_RUN;
 
-    private long evictorShutdownTimeoutMillis =
-            DEFAULT_EVICTOR_SHUTDOWN_TIMEOUT_MILLIS;
-
-    private long softMinEvictableIdleTimeMillis =
-            DEFAULT_SOFT_MIN_EVICTABLE_IDLE_TIME_MILLIS;
-
-    private int numTestsPerEvictionRun =
-            DEFAULT_NUM_TESTS_PER_EVICTION_RUN;
-
-    private EvictionPolicy<T> evictionPolicy = null; // Only 2.6.0 applications set this
-
+    /** Only 2.6.0 applications set this */
+    private EvictionPolicy<T> evictionPolicy = null;
+    /** evict策略的类名，默认为org.apache.commons.pool2.impl.DefaultEvictionPolicy */
     private String evictionPolicyClassName = DEFAULT_EVICTION_POLICY_CLASS_NAME;
 
+
+    /** 默认false，create的时候检测是否有效，如果无效则从连接池中移除，并尝试继续获取 */
     private boolean testOnCreate = DEFAULT_TEST_ON_CREATE;
-
+    /** 默认false，borrow的时候检测是否有效，如果无效则从连接池中移除，并尝试获取继续获取 */
     private boolean testOnBorrow = DEFAULT_TEST_ON_BORROW;
-
+    /** 默认false，return的时候检测是有有效，如果无效则从连接池中移除，并尝试获取继续获取 */
     private boolean testOnReturn = DEFAULT_TEST_ON_RETURN;
-
+    /** 默认false */
     private boolean testWhileIdle = DEFAULT_TEST_WHILE_IDLE;
 
-    private long timeBetweenEvictionRunsMillis =
-            DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS;
+    /** 空闲连接检测线程检测的周期，毫秒数。如果为负值，表示不运行检测线程。默认为-1. */
+    private long timeBetweenEvictionRunsMillis = DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS;
 
-    private boolean blockWhenExhausted = DEFAULT_BLOCK_WHEN_EXHAUSTED;
+
 
     private boolean jmxEnabled = DEFAULT_JMX_ENABLE;
 
@@ -220,6 +212,10 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
 
     private String jmxNameBase = DEFAULT_JMX_NAME_BASE;
 
+
+
+
+    // getter and setter ...
 
     /**
      * Get the value for the {@code lifo} configuration attribute for pools
@@ -233,7 +229,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
     public boolean getLifo() {
         return lifo;
     }
-
     /**
      * Get the value for the {@code fairness} configuration attribute for pools
      * created with this configuration instance.
@@ -246,7 +241,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
     public boolean getFairness() {
         return fairness;
     }
-
     /**
      * Set the value for the {@code lifo} configuration attribute for pools
      * created with this configuration instance.
@@ -259,7 +253,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
     public void setLifo(final boolean lifo) {
         this.lifo = lifo;
     }
-
     /**
      * Set the value for the {@code fairness} configuration attribute for pools
      * created with this configuration instance.
@@ -272,7 +265,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
     public void setFairness(final boolean fairness) {
         this.fairness = fairness;
     }
-
     /**
      * Get the value for the {@code maxWait} configuration attribute for pools
      * created with this configuration instance.
@@ -285,7 +277,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
     public long getMaxWaitMillis() {
         return maxWaitMillis;
     }
-
     /**
      * Set the value for the {@code maxWait} configuration attribute for pools
      * created with this configuration instance.
@@ -298,7 +289,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
     public void setMaxWaitMillis(final long maxWaitMillis) {
         this.maxWaitMillis = maxWaitMillis;
     }
-
     /**
      * Get the value for the {@code minEvictableIdleTimeMillis} configuration
      * attribute for pools created with this configuration instance.
@@ -311,7 +301,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
     public long getMinEvictableIdleTimeMillis() {
         return minEvictableIdleTimeMillis;
     }
-
     /**
      * Set the value for the {@code minEvictableIdleTimeMillis} configuration
      * attribute for pools created with this configuration instance.
@@ -324,7 +313,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
     public void setMinEvictableIdleTimeMillis(final long minEvictableIdleTimeMillis) {
         this.minEvictableIdleTimeMillis = minEvictableIdleTimeMillis;
     }
-
     /**
      * Get the value for the {@code softMinEvictableIdleTimeMillis}
      * configuration attribute for pools created with this configuration
@@ -338,7 +326,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
     public long getSoftMinEvictableIdleTimeMillis() {
         return softMinEvictableIdleTimeMillis;
     }
-
     /**
      * Set the value for the {@code softMinEvictableIdleTimeMillis}
      * configuration attribute for pools created with this configuration
@@ -350,11 +337,9 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
      * @see GenericObjectPool#getSoftMinEvictableIdleTimeMillis()
      * @see GenericKeyedObjectPool#getSoftMinEvictableIdleTimeMillis()
      */
-    public void setSoftMinEvictableIdleTimeMillis(
-            final long softMinEvictableIdleTimeMillis) {
+    public void setSoftMinEvictableIdleTimeMillis(final long softMinEvictableIdleTimeMillis) {
         this.softMinEvictableIdleTimeMillis = softMinEvictableIdleTimeMillis;
     }
-
     /**
      * Get the value for the {@code numTestsPerEvictionRun} configuration
      * attribute for pools created with this configuration instance.
@@ -367,7 +352,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
     public int getNumTestsPerEvictionRun() {
         return numTestsPerEvictionRun;
     }
-
     /**
      * Set the value for the {@code numTestsPerEvictionRun} configuration
      * attribute for pools created with this configuration instance.
@@ -380,7 +364,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
     public void setNumTestsPerEvictionRun(final int numTestsPerEvictionRun) {
         this.numTestsPerEvictionRun = numTestsPerEvictionRun;
     }
-
     /**
      * Get the value for the {@code evictorShutdownTimeoutMillis} configuration
      * attribute for pools created with this configuration instance.
@@ -393,7 +376,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
     public long getEvictorShutdownTimeoutMillis() {
         return evictorShutdownTimeoutMillis;
     }
-
     /**
      * Set the value for the {@code evictorShutdownTimeoutMillis} configuration
      * attribute for pools created with this configuration instance.
@@ -404,11 +386,9 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
      * @see GenericObjectPool#getEvictorShutdownTimeoutMillis()
      * @see GenericKeyedObjectPool#getEvictorShutdownTimeoutMillis()
      */
-    public void setEvictorShutdownTimeoutMillis(
-            final long evictorShutdownTimeoutMillis) {
+    public void setEvictorShutdownTimeoutMillis(final long evictorShutdownTimeoutMillis) {
         this.evictorShutdownTimeoutMillis = evictorShutdownTimeoutMillis;
     }
-
     /**
      * Get the value for the {@code testOnCreate} configuration attribute for
      * pools created with this configuration instance.
@@ -422,7 +402,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
     public boolean getTestOnCreate() {
         return testOnCreate;
     }
-
     /**
      * Set the value for the {@code testOnCreate} configuration attribute for
      * pools created with this configuration instance.
@@ -436,7 +415,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
     public void setTestOnCreate(final boolean testOnCreate) {
         this.testOnCreate = testOnCreate;
     }
-
     /**
      * Get the value for the {@code testOnBorrow} configuration attribute for
      * pools created with this configuration instance.
@@ -449,7 +427,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
     public boolean getTestOnBorrow() {
         return testOnBorrow;
     }
-
     /**
      * Set the value for the {@code testOnBorrow} configuration attribute for
      * pools created with this configuration instance.
@@ -462,7 +439,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
     public void setTestOnBorrow(final boolean testOnBorrow) {
         this.testOnBorrow = testOnBorrow;
     }
-
     /**
      * Get the value for the {@code testOnReturn} configuration attribute for
      * pools created with this configuration instance.
@@ -475,7 +451,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
     public boolean getTestOnReturn() {
         return testOnReturn;
     }
-
     /**
      * Set the value for the {@code testOnReturn} configuration attribute for
      * pools created with this configuration instance.
@@ -488,7 +463,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
     public void setTestOnReturn(final boolean testOnReturn) {
         this.testOnReturn = testOnReturn;
     }
-
     /**
      * Get the value for the {@code testWhileIdle} configuration attribute for
      * pools created with this configuration instance.
@@ -501,7 +475,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
     public boolean getTestWhileIdle() {
         return testWhileIdle;
     }
-
     /**
      * Set the value for the {@code testWhileIdle} configuration attribute for
      * pools created with this configuration instance.
@@ -514,7 +487,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
     public void setTestWhileIdle(final boolean testWhileIdle) {
         this.testWhileIdle = testWhileIdle;
     }
-
     /**
      * Get the value for the {@code timeBetweenEvictionRunsMillis} configuration
      * attribute for pools created with this configuration instance.
@@ -527,7 +499,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
     public long getTimeBetweenEvictionRunsMillis() {
         return timeBetweenEvictionRunsMillis;
     }
-
     /**
      * Set the value for the {@code timeBetweenEvictionRunsMillis} configuration
      * attribute for pools created with this configuration instance.
@@ -538,11 +509,9 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
      * @see GenericObjectPool#getTimeBetweenEvictionRunsMillis()
      * @see GenericKeyedObjectPool#getTimeBetweenEvictionRunsMillis()
      */
-    public void setTimeBetweenEvictionRunsMillis(
-            final long timeBetweenEvictionRunsMillis) {
+    public void setTimeBetweenEvictionRunsMillis(final long timeBetweenEvictionRunsMillis) {
         this.timeBetweenEvictionRunsMillis = timeBetweenEvictionRunsMillis;
     }
-
     /**
      * Get the value for the {@code evictionPolicyClass} configuration
      * attribute for pools created with this configuration instance.
@@ -556,7 +525,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
     public EvictionPolicy<T> getEvictionPolicy() {
         return evictionPolicy;
     }
-
     /**
      * Get the value for the {@code evictionPolicyClassName} configuration
      * attribute for pools created with this configuration instance.
@@ -569,7 +537,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
     public String getEvictionPolicyClassName() {
         return evictionPolicyClassName;
     }
-
     /**
      * Set the value for the {@code evictionPolicyClass} configuration
      * attribute for pools created with this configuration instance.
@@ -583,7 +550,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
     public void setEvictionPolicy(final EvictionPolicy<T> evictionPolicy) {
         this.evictionPolicy = evictionPolicy;
     }
-
     /**
      * Set the value for the {@code evictionPolicyClassName} configuration
      * attribute for pools created with this configuration instance.
@@ -596,7 +562,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
     public void setEvictionPolicyClassName(final String evictionPolicyClassName) {
         this.evictionPolicyClassName = evictionPolicyClassName;
     }
-
     /**
      * Get the value for the {@code blockWhenExhausted} configuration attribute
      * for pools created with this configuration instance.
@@ -609,7 +574,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
     public boolean getBlockWhenExhausted() {
         return blockWhenExhausted;
     }
-
     /**
      * Set the value for the {@code blockWhenExhausted} configuration attribute
      * for pools created with this configuration instance.
@@ -622,7 +586,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
     public void setBlockWhenExhausted(final boolean blockWhenExhausted) {
         this.blockWhenExhausted = blockWhenExhausted;
     }
-
     /**
      * Gets the value of the flag that determines if JMX will be enabled for
      * pools created with this configuration instance.
@@ -633,7 +596,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
     public boolean getJmxEnabled() {
         return jmxEnabled;
     }
-
     /**
      * Sets the value of the flag that determines if JMX will be enabled for
      * pools created with this configuration instance.
@@ -644,7 +606,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
     public void setJmxEnabled(final boolean jmxEnabled) {
         this.jmxEnabled = jmxEnabled;
     }
-
     /**
      * Gets the value of the JMX name base that will be used as part of the
      * name assigned to JMX enabled pools created with this configuration
@@ -657,7 +618,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
     public String getJmxNameBase() {
         return jmxNameBase;
     }
-
     /**
      * Sets the value of the JMX name base that will be used as part of the
      * name assigned to JMX enabled pools created with this configuration
@@ -670,7 +630,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
     public void setJmxNameBase(final String jmxNameBase) {
         this.jmxNameBase = jmxNameBase;
     }
-
     /**
      * Gets the value of the JMX name prefix that will be used as part of the
      * name assigned to JMX enabled pools created with this configuration
@@ -682,7 +641,6 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
     public String getJmxNamePrefix() {
         return jmxNamePrefix;
     }
-
     /**
      * Sets the value of the JMX name prefix that will be used as part of the
      * name assigned to JMX enabled pools created with this configuration
@@ -694,6 +652,8 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
     public void setJmxNamePrefix(final String jmxNamePrefix) {
         this.jmxNamePrefix = jmxNamePrefix;
     }
+
+
 
     @Override
     protected void toStringAppendFields(final StringBuilder builder) {

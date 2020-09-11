@@ -23,18 +23,16 @@ package org.apache.commons.pool2;
  */
 public enum PooledObjectState {
 
-    /**
-     * In the queue, not in use.
-     */
+    /** 在池中，处于空闲状态 */
     IDLE,
 
     /**
-     * In use.
+     * 已出借状态
      */
     ALLOCATED,
 
     /**
-     * In the queue, currently being tested for possible eviction.
+     * 在队列中，当前正在测试可能的驱逐。
      */
     EVICTION,
 
@@ -49,39 +47,38 @@ public enum PooledObjectState {
     EVICTION_RETURN_TO_HEAD,
 
     /**
-     * In the queue, currently being validated.
+     * 在队列中 正在被检查
      */
     VALIDATION,
 
     /**
-     * Not in queue, currently being validated. The object was borrowed while
-     * being validated and since testOnBorrow was configured, it was removed
-     * from the queue and pre-allocated. It should be allocated once validation
-     * completes.
+     * 验证结束要被分配：
+     * 不在队列中，目前正在验证中。
+     * 对象是在验证时借用的，并且由于已配置testOnBorrow，因此已将其从队列中删除并进行了预先分配。
+     * 验证完成后应分配。
      */
     VALIDATION_PREALLOCATED,
 
     /**
-     * Not in queue, currently being validated. An attempt to borrow the object
-     * was made while previously being tested for eviction which removed it from
-     * the queue. It should be returned to the head of the queue once validation
-     * completes.
+     * 检查结束要放回队列头部：
+     * 不在队列中，目前正在验证中。
+     * 在先前进行逐出测试时，尝试借用该对象将其从队列中删除。
+     * 验证完成后，应将其返回到队列的开头。
      */
     VALIDATION_RETURN_TO_HEAD,
 
     /**
-     * Failed maintenance (e.g. eviction test or validation) and will be / has
-     * been destroyed
+     * 不可用 即将/已经被销毁
      */
     INVALID,
 
     /**
-     * Deemed abandoned, to be invalidated.
+     * 被遗弃
      */
     ABANDONED,
 
     /**
-     * Returning to the pool.
+     * 返回对象池
      */
     RETURNING
 }

@@ -20,7 +20,6 @@
  * /src/site/xdoc/examples.xml
  * It is not intended to be included in a source release.
  */
-
 import java.io.IOException;
 import java.io.Reader;
 

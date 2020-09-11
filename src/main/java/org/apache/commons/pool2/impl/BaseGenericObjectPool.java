@@ -57,41 +57,29 @@ public abstract class BaseGenericObjectPool<T> extends BaseObject {
 
     // Constants
     /**
-     * The size of the caches used to store historical data for some attributes
-     * so that rolling means may be calculated.
+     * 用于存储某些属性的历史数据的缓存的大小，以便可以计算滚动方式
      */
     public static final int MEAN_TIMING_STATS_CACHE_SIZE = 100;
 
     private static final String EVICTION_POLICY_TYPE_NAME = EvictionPolicy.class.getName();
 
     // Configuration attributes
-    private volatile int maxTotal =
-            GenericKeyedObjectPoolConfig.DEFAULT_MAX_TOTAL;
-    private volatile boolean blockWhenExhausted =
-            BaseObjectPoolConfig.DEFAULT_BLOCK_WHEN_EXHAUSTED;
-    private volatile long maxWaitMillis =
-            BaseObjectPoolConfig.DEFAULT_MAX_WAIT_MILLIS;
+    private volatile int maxTotal = GenericKeyedObjectPoolConfig.DEFAULT_MAX_TOTAL;
+    /** 当对象池耗尽时（即达到“活动”对象的最大数量），调用roweObject()方法是否阻塞 */
+    private volatile boolean blockWhenExhausted = BaseObjectPoolConfig.DEFAULT_BLOCK_WHEN_EXHAUSTED;
+    private volatile long maxWaitMillis = BaseObjectPoolConfig.DEFAULT_MAX_WAIT_MILLIS;
     private volatile boolean lifo = BaseObjectPoolConfig.DEFAULT_LIFO;
     private final boolean fairness;
-    private volatile boolean testOnCreate =
-            BaseObjectPoolConfig.DEFAULT_TEST_ON_CREATE;
-    private volatile boolean testOnBorrow =
-            BaseObjectPoolConfig.DEFAULT_TEST_ON_BORROW;
-    private volatile boolean testOnReturn =
-            BaseObjectPoolConfig.DEFAULT_TEST_ON_RETURN;
-    private volatile boolean testWhileIdle =
-            BaseObjectPoolConfig.DEFAULT_TEST_WHILE_IDLE;
-    private volatile long timeBetweenEvictionRunsMillis =
-            BaseObjectPoolConfig.DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS;
-    private volatile int numTestsPerEvictionRun =
-            BaseObjectPoolConfig.DEFAULT_NUM_TESTS_PER_EVICTION_RUN;
-    private volatile long minEvictableIdleTimeMillis =
-            BaseObjectPoolConfig.DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS;
-    private volatile long softMinEvictableIdleTimeMillis =
-            BaseObjectPoolConfig.DEFAULT_SOFT_MIN_EVICTABLE_IDLE_TIME_MILLIS;
+    private volatile boolean testOnCreate = BaseObjectPoolConfig.DEFAULT_TEST_ON_CREATE;
+    private volatile boolean testOnBorrow = BaseObjectPoolConfig.DEFAULT_TEST_ON_BORROW;
+    private volatile boolean testOnReturn = BaseObjectPoolConfig.DEFAULT_TEST_ON_RETURN;
+    private volatile boolean testWhileIdle = BaseObjectPoolConfig.DEFAULT_TEST_WHILE_IDLE;
+    private volatile long timeBetweenEvictionRunsMillis = BaseObjectPoolConfig.DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS;
+    private volatile int numTestsPerEvictionRun = BaseObjectPoolConfig.DEFAULT_NUM_TESTS_PER_EVICTION_RUN;
+    private volatile long minEvictableIdleTimeMillis = BaseObjectPoolConfig.DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS;
+    private volatile long softMinEvictableIdleTimeMillis = BaseObjectPoolConfig.DEFAULT_SOFT_MIN_EVICTABLE_IDLE_TIME_MILLIS;
     private volatile EvictionPolicy<T> evictionPolicy;
-    private volatile long evictorShutdownTimeoutMillis =
-            BaseObjectPoolConfig.DEFAULT_EVICTOR_SHUTDOWN_TIMEOUT_MILLIS;
+    private volatile long evictorShutdownTimeoutMillis = BaseObjectPoolConfig.DEFAULT_EVICTOR_SHUTDOWN_TIMEOUT_MILLIS;
 
 
     // Internal (primarily state) attributes
@@ -134,8 +122,7 @@ public abstract class BaseGenericObjectPool<T> extends BaseObject {
      *                      overridden by the config
      * @param jmxNamePrefix Prefix to be used for JMX name for the new pool
      */
-    public BaseGenericObjectPool(final BaseObjectPoolConfig<T> config,
-                                 final String jmxNameBase, final String jmxNamePrefix) {
+    public BaseGenericObjectPool(final BaseObjectPoolConfig<T> config, final String jmxNameBase, final String jmxNamePrefix) {
         if (config.getJmxEnabled()) {
             this.objectName = jmxRegister(config, jmxNameBase, jmxNamePrefix);
         } else {
@@ -186,9 +173,7 @@ public abstract class BaseGenericObjectPool<T> extends BaseObject {
     }
 
     /**
-     * Returns whether to block when the <code>borrowObject()</code> method is
-     * invoked when the pool is exhausted (the maximum number of "active"
-     * objects has been reached).
+     * 当对象池耗尽时（即达到“活动”对象的最大数量），调用roweObject()方法是否阻塞
      *
      * @return <code>true</code> if <code>borrowObject()</code> should block
      * when the pool is exhausted
@@ -467,8 +452,7 @@ public abstract class BaseGenericObjectPool<T> extends BaseObject {
      * @param timeBetweenEvictionRunsMillis number of milliseconds to sleep between evictor runs
      * @see #getTimeBetweenEvictionRunsMillis
      */
-    public final void setTimeBetweenEvictionRunsMillis(
-            final long timeBetweenEvictionRunsMillis) {
+    public final void setTimeBetweenEvictionRunsMillis(final long timeBetweenEvictionRunsMillis) {
         this.timeBetweenEvictionRunsMillis = timeBetweenEvictionRunsMillis;
         startEvictor(timeBetweenEvictionRunsMillis);
     }
@@ -926,8 +910,7 @@ public abstract class BaseGenericObjectPool<T> extends BaseObject {
      * @param swallowedExceptionListener The listener or <code>null</code>
      *                                   for no listener
      */
-    public final void setSwallowedExceptionListener(
-            final SwallowedExceptionListener swallowedExceptionListener) {
+    public final void setSwallowedExceptionListener(final SwallowedExceptionListener swallowedExceptionListener) {
         this.swallowedExceptionListener = swallowedExceptionListener;
     }
 
@@ -1028,8 +1011,7 @@ public abstract class BaseGenericObjectPool<T> extends BaseObject {
      * @param jmxNamePrefix name prefix
      * @return registered ObjectName, null if registration fails
      */
-    private ObjectName jmxRegister(final BaseObjectPoolConfig<T> config,
-                                   final String jmxNameBase, String jmxNamePrefix) {
+    private ObjectName jmxRegister(final BaseObjectPoolConfig<T> config, final String jmxNameBase, String jmxNamePrefix) {
         ObjectName newObjectName = null;
         final MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
         int i = 1;

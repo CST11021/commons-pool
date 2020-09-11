@@ -71,17 +71,15 @@ package org.apache.commons.pool2;
 public interface PooledObjectFactory<T> {
 
     /**
-     * Creates an instance that can be served by the pool and wrap it in a
-     * {@link PooledObject} to be managed by the pool.
+     * 创建一个对象实例，并将其包装在{@link PooledObject}中，以便由池进行管理
      *
      * @return a {@code PooledObject} wrapping an instance that can be served by the pool
-     * @throws Exception if there is a problem creating a new instance,
-     *                   this will be propagated to the code requesting an object.
+     * @throws Exception if there is a problem creating a new instance, this will be propagated to the code requesting an object.
      */
     PooledObject<T> makeObject() throws Exception;
 
     /**
-     * Destroys an instance no longer needed by the pool.
+     * 销毁该对象实例
      * <p>
      * It is important for implementations of this method to be aware that there
      * is no guarantee about what state <code>obj</code> will be in and the
@@ -101,16 +99,15 @@ public interface PooledObjectFactory<T> {
     void destroyObject(PooledObject<T> p) throws Exception;
 
     /**
-     * Ensures that the instance is safe to be returned by the pool.
+     * 检查该对象实例是否可以安全地归还到池中，如果对象无效，应将其从池中删除，此时返回false
      *
-     * @param p a {@code PooledObject} wrapping the instance to be validated
-     * @return <code>false</code> if <code>obj</code> is not valid and should
-     * be dropped from the pool, <code>true</code> otherwise.
+     * @param p
+     * @return
      */
     boolean validateObject(PooledObject<T> p);
 
     /**
-     * Reinitializes an instance to be returned by the pool.
+     * 重新初始化要由池返回的实例
      *
      * @param p a {@code PooledObject} wrapping the instance to be activated
      * @throws Exception if there is a problem activating <code>obj</code>,
@@ -120,7 +117,7 @@ public interface PooledObjectFactory<T> {
     void activateObject(PooledObject<T> p) throws Exception;
 
     /**
-     * Uninitializes an instance to be returned to the idle object pool.
+     * 取消初始化要返回到空闲对象池的实例
      *
      * @param p a {@code PooledObject} wrapping the instance to be passivated
      * @throws Exception if there is a problem passivating <code>obj</code>,

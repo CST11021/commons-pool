@@ -17,7 +17,7 @@
 package org.apache.commons.pool2;
 
 /**
- * A simple base implementation of {@link ObjectPool}.
+ * {@link ObjectPool}的简单基础实现。
  * Optional operations are implemented to either do nothing, return a value
  * indicating it is unsupported or throw {@link UnsupportedOperationException}.
  * <p>
@@ -28,6 +28,8 @@ package org.apache.commons.pool2;
  * @since 2.0
  */
 public abstract class BaseObjectPool<T> extends BaseObject implements ObjectPool<T> {
+
+    private volatile boolean closed = false;
 
     @Override
     public abstract T borrowObject() throws Exception;
@@ -114,8 +116,6 @@ public abstract class BaseObjectPool<T> extends BaseObject implements ObjectPool
             throw new IllegalStateException("Pool not open");
         }
     }
-
-    private volatile boolean closed = false;
 
     @Override
     protected void toStringAppendFields(final StringBuilder builder) {

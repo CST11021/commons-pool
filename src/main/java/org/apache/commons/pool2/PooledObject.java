@@ -20,44 +20,36 @@ import java.io.PrintWriter;
 import java.util.Deque;
 
 /**
- * Defines the wrapper that is used to track the additional information, such as
- * state, for the pooled objects.
- * <p>
- * Implementations of this class are required to be thread-safe.
- * </p>
+ * 该类包装了对象池中原始的对象实例，此类的实现必须是线程安全的。
  *
- * @param <T> the type of object in the pool
+ * @param <T> 池中对象的类型
  * @since 2.0
  */
 public interface PooledObject<T> extends Comparable<PooledObject<T>> {
 
     /**
-     * Obtains the underlying object that is wrapped by this instance of
-     * {@link PooledObject}.
+     * 返回被包装的原始对象
      *
-     * @return The wrapped object
+     * @return
      */
     T getObject();
 
     /**
-     * Obtains the time (using the same basis as
-     * {@link System#currentTimeMillis()}) that this object was created.
+     * 该原始对象的创建时间
      *
-     * @return The creation time for the wrapped object
+     * @return
      */
     long getCreateTime();
 
     /**
-     * Obtains the time in milliseconds that this object last spent in the
-     * active state (it may still be active in which case subsequent calls will
-     * return an increased value).
+     * 上一次处于活动状态所花费的时间（以毫秒为单位）
      *
-     * @return The time in milliseconds last spent in the active state
+     * @return
      */
     long getActiveTimeMillis();
 
     /**
-     * Gets the number of times this object has been borrowed.
+     * 获取此对象被借用的次数
      *
      * @return -1 by default for old implementations prior to release 2.7.0.
      * @since 2.7.0
@@ -67,23 +59,21 @@ public interface PooledObject<T> extends Comparable<PooledObject<T>> {
     }
 
     /**
-     * Obtains the time in milliseconds that this object last spend in the
-     * idle state (it may still be idle in which case subsequent calls will
-     * return an increased value).
+     * 返回该对象上次处于空闲状态距离现在的时间（以毫秒为单位）
      *
-     * @return The time in milliseconds last spent in the idle state
+     * @return
      */
     long getIdleTimeMillis();
 
     /**
-     * Obtains the time the wrapped object was last borrowed.
+     * 返回该对象上次被借用的时间
      *
-     * @return The time the object was last borrowed
+     * @return
      */
     long getLastBorrowTime();
 
     /**
-     * Obtains the time the wrapped object was last returned.
+     * 获取该对象上次归还的时间
      *
      * @return The time the object was last returned
      */
@@ -99,35 +89,6 @@ public interface PooledObject<T> extends Comparable<PooledObject<T>> {
      * @return the last time this object was used
      */
     long getLastUsedTime();
-
-    /**
-     * Orders instances based on idle time - i.e. the length of time since the
-     * instance was returned to the pool. Used by the GKOP idle object evictor.
-     * <p>
-     * Note: This class has a natural ordering that is inconsistent with
-     * equals if distinct objects have the same identity hash code.
-     * </p>
-     * <p>
-     * {@inheritDoc}
-     * </p>
-     */
-    @Override
-    int compareTo(PooledObject<T> other);
-
-    @Override
-    boolean equals(Object obj);
-
-    @Override
-    int hashCode();
-
-    /**
-     * Provides a String form of the wrapper for debug purposes. The format is
-     * not fixed and may change at any time.
-     * <p>
-     * {@inheritDoc}
-     */
-    @Override
-    String toString();
 
     /**
      * Attempts to place the pooled object in the
@@ -149,15 +110,14 @@ public interface PooledObject<T> extends Comparable<PooledObject<T>> {
     boolean endEvictionTest(Deque<PooledObject<T>> idleQueue);
 
     /**
-     * Allocates the object.
+     * 分配对象
      *
      * @return {@code true} if the original state was {@link PooledObjectState#IDLE IDLE}
      */
     boolean allocate();
 
     /**
-     * Deallocates the object and sets it {@link PooledObjectState#IDLE IDLE}
-     * if it is currently {@link PooledObjectState#ALLOCATED ALLOCATED}.
+     * 取消分配对象，并将其设置为{@link PooledObjectState#IDLE}（如果当前为{@link PooledObjectState#ALLOCATED}）。
      *
      * @return {@code true} if the state was {@link PooledObjectState#ALLOCATED ALLOCATED}
      */
@@ -212,7 +172,7 @@ public interface PooledObject<T> extends Comparable<PooledObject<T>> {
     PooledObjectState getState();
 
     /**
-     * Marks the pooled object as abandoned.
+     * 将该对象标记为已放弃
      */
     void markAbandoned();
 
@@ -220,5 +180,20 @@ public interface PooledObject<T> extends Comparable<PooledObject<T>> {
      * Marks the object as returning to the pool.
      */
     void markReturning();
+
+
+
+
+    @Override
+    int compareTo(PooledObject<T> other);
+
+    @Override
+    boolean equals(Object obj);
+
+    @Override
+    int hashCode();
+
+    @Override
+    String toString();
 
 }

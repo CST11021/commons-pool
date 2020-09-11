@@ -30,41 +30,20 @@ import java.io.PrintWriter;
 public class AbandonedConfig {
 
     /**
-     * Whether or not borrowObject performs abandoned object removal.
+     * 是否移除被借出去的对象
      */
     private boolean removeAbandonedOnBorrow = false;
 
-    /**
-     * <p>Flag to remove abandoned objects if they exceed the
-     * removeAbandonedTimeout when borrowObject is invoked.</p>
-     *
-     * <p>The default value is false.</p>
-     *
-     * <p>If set to true, abandoned objects are removed by borrowObject if
-     * there are fewer than 2 idle objects available in the pool and
-     * <code>getNumActive() &gt; getMaxTotal() - 3</code></p>
-     *
-     * @return true if abandoned objects are to be removed by borrowObject
-     */
+
     public boolean getRemoveAbandonedOnBorrow() {
         return this.removeAbandonedOnBorrow;
     }
-
-    /**
-     * <p>Flag to remove abandoned objects if they exceed the
-     * removeAbandonedTimeout when borrowObject is invoked.</p>
-     *
-     * @param removeAbandonedOnBorrow true means abandoned objects will be
-     *                                removed by borrowObject
-     * @see #getRemoveAbandonedOnBorrow()
-     */
     public void setRemoveAbandonedOnBorrow(final boolean removeAbandonedOnBorrow) {
         this.removeAbandonedOnBorrow = removeAbandonedOnBorrow;
     }
 
     /**
-     * Whether or not pool maintenance (evictor) performs abandoned object
-     * removal.
+     * Whether or not pool maintenance (evictor) performs abandoned object removal.
      */
     private boolean removeAbandonedOnMaintenance = false;
 
@@ -168,9 +147,8 @@ public class AbandonedConfig {
     }
 
     /**
-     * Determines whether or not to log full stack traces when logAbandoned is true.
-     * If disabled, then a faster method for logging stack traces with only class data
-     * may be used if possible.
+     * 确定当logAbandoned为true时是否记录完整的堆栈跟踪。
+     * 如果禁用，则可以使用更快的方法来记录仅包含类数据的堆栈跟踪。
      *
      * @since 2.5
      */

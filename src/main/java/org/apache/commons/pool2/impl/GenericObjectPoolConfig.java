@@ -30,104 +30,43 @@ package org.apache.commons.pool2.impl;
  */
 public class GenericObjectPoolConfig<T> extends BaseObjectPoolConfig<T> {
 
-    /**
-     * The default value for the {@code maxTotal} configuration attribute.
-     *
-     * @see GenericObjectPool#getMaxTotal()
-     */
     public static final int DEFAULT_MAX_TOTAL = 8;
-
-    /**
-     * The default value for the {@code maxIdle} configuration attribute.
-     *
-     * @see GenericObjectPool#getMaxIdle()
-     */
     public static final int DEFAULT_MAX_IDLE = 8;
-
-    /**
-     * The default value for the {@code minIdle} configuration attribute.
-     *
-     * @see GenericObjectPool#getMinIdle()
-     */
     public static final int DEFAULT_MIN_IDLE = 0;
 
 
+    /** 表示池中最多能够存在的对象，包括借出去后还未还回来的 */
     private int maxTotal = DEFAULT_MAX_TOTAL;
-
+    /** 池中最多能够存在的空闲对象，即所有未被借出去的 */
     private int maxIdle = DEFAULT_MAX_IDLE;
-
+    /**
+     * 池中至少应该存在的空闲对象，假如，最小空闲数为1，最大总数为10，那么当一个线程从池中借对象，而池中只有一个空闲对象的时候，池会在创建一个对象，并借出一个对象，从而保证池中最小空闲数为1
+     *
+     * minIdle属性是指pool中最少有多少个空闲对象。该属性主要是在evict函数中调用。封装成EvictionConfig对象后，调用EvictionPolicy中的evict方法来判断是否需要回收当前测试的对象。
+     *
+     * evict函数是有一个定时任务定时去调用的。所以pool中一般会维持minIdle个闲置对象。所以如果当前pool中闲置对象的数量小于minIdle，pool并不会创建新的对象。minIdle只是用来回收对象的时候进行判断。
+     *
+     * */
     private int minIdle = DEFAULT_MIN_IDLE;
 
-    /**
-     * Get the value for the {@code maxTotal} configuration attribute
-     * for pools created with this configuration instance.
-     *
-     * @return The current setting of {@code maxTotal} for this
-     * configuration instance
-     * @see GenericObjectPool#getMaxTotal()
-     */
+
+    // getter and setter ...
+
     public int getMaxTotal() {
         return maxTotal;
     }
-
-    /**
-     * Set the value for the {@code maxTotal} configuration attribute for
-     * pools created with this configuration instance.
-     *
-     * @param maxTotal The new setting of {@code maxTotal}
-     *                 for this configuration instance
-     * @see GenericObjectPool#setMaxTotal(int)
-     */
     public void setMaxTotal(final int maxTotal) {
         this.maxTotal = maxTotal;
     }
-
-
-    /**
-     * Get the value for the {@code maxIdle} configuration attribute
-     * for pools created with this configuration instance.
-     *
-     * @return The current setting of {@code maxIdle} for this
-     * configuration instance
-     * @see GenericObjectPool#getMaxIdle()
-     */
     public int getMaxIdle() {
         return maxIdle;
     }
-
-    /**
-     * Set the value for the {@code maxIdle} configuration attribute for
-     * pools created with this configuration instance.
-     *
-     * @param maxIdle The new setting of {@code maxIdle}
-     *                for this configuration instance
-     * @see GenericObjectPool#setMaxIdle(int)
-     */
     public void setMaxIdle(final int maxIdle) {
         this.maxIdle = maxIdle;
     }
-
-
-    /**
-     * Get the value for the {@code minIdle} configuration attribute
-     * for pools created with this configuration instance.
-     *
-     * @return The current setting of {@code minIdle} for this
-     * configuration instance
-     * @see GenericObjectPool#getMinIdle()
-     */
     public int getMinIdle() {
         return minIdle;
     }
-
-    /**
-     * Set the value for the {@code minIdle} configuration attribute for
-     * pools created with this configuration instance.
-     *
-     * @param minIdle The new setting of {@code minIdle}
-     *                for this configuration instance
-     * @see GenericObjectPool#setMinIdle(int)
-     */
     public void setMinIdle(final int minIdle) {
         this.minIdle = minIdle;
     }
