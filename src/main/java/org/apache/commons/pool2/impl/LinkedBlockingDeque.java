@@ -60,8 +60,7 @@ import java.util.concurrent.locks.Condition;
  *            Commons Pool.
  * @since 2.0
  */
-class LinkedBlockingDeque<E> extends AbstractQueue<E>
-        implements Deque<E>, Serializable {
+class LinkedBlockingDeque<E> extends AbstractQueue<E> implements Deque<E>, Serializable {
 
     /*
      * Implemented as a simple doubly-linked list protected by a
@@ -137,19 +136,19 @@ class LinkedBlockingDeque<E> extends AbstractQueue<E>
      * Invariant: (first == null && last == null) ||
      * (first.prev == null && first.item != null)
      */
-    private transient Node<E> first; // @GuardedBy("lock")
+    private transient Node<E> first;
 
     /**
      * Pointer to last node.
      * Invariant: (first == null && last == null) ||
      * (last.next == null && last.item != null)
      */
-    private transient Node<E> last; // @GuardedBy("lock")
+    private transient Node<E> last;
 
     /**
      * Number of items in the deque
      */
-    private transient int count; // @GuardedBy("lock")
+    private transient int count;
 
     /**
      * Maximum number of items in the deque
@@ -171,6 +170,8 @@ class LinkedBlockingDeque<E> extends AbstractQueue<E>
      */
     private final Condition notFull;
 
+
+
     /**
      * Creates a {@code LinkedBlockingDeque} with a capacity of
      * {@link Integer#MAX_VALUE}.
@@ -178,7 +179,6 @@ class LinkedBlockingDeque<E> extends AbstractQueue<E>
     public LinkedBlockingDeque() {
         this(Integer.MAX_VALUE);
     }
-
     /**
      * Creates a {@code LinkedBlockingDeque} with a capacity of
      * {@link Integer#MAX_VALUE} and the given fairness policy.
@@ -189,7 +189,6 @@ class LinkedBlockingDeque<E> extends AbstractQueue<E>
     public LinkedBlockingDeque(final boolean fairness) {
         this(Integer.MAX_VALUE, fairness);
     }
-
     /**
      * Creates a {@code LinkedBlockingDeque} with the given (fixed) capacity.
      *
@@ -199,7 +198,6 @@ class LinkedBlockingDeque<E> extends AbstractQueue<E>
     public LinkedBlockingDeque(final int capacity) {
         this(capacity, false);
     }
-
     /**
      * Creates a {@code LinkedBlockingDeque} with the given (fixed) capacity
      * and fairness policy.
@@ -218,7 +216,6 @@ class LinkedBlockingDeque<E> extends AbstractQueue<E>
         notEmpty = lock.newCondition();
         notFull = lock.newCondition();
     }
-
     /**
      * Creates a {@code LinkedBlockingDeque} with a capacity of
      * {@link Integer#MAX_VALUE}, initially containing the elements of
@@ -582,8 +579,7 @@ class LinkedBlockingDeque<E> extends AbstractQueue<E>
     }
 
     /**
-     * Unlinks the first element in the queue, waiting until there is an element
-     * to unlink if the queue is empty.
+     * 取消链接队列中的第一个元素，直到队列为空时等待直到要取消链接的元素。
      *
      * @return the unlinked element
      * @throws InterruptedException if the current thread is interrupted
@@ -630,8 +626,7 @@ class LinkedBlockingDeque<E> extends AbstractQueue<E>
      * @return the unlinked element
      * @throws InterruptedException if the current thread is interrupted
      */
-    public E pollFirst(final long timeout, final TimeUnit unit)
-            throws InterruptedException {
+    public E pollFirst(final long timeout, final TimeUnit unit) throws InterruptedException {
         long nanos = unit.toNanos(timeout);
         lock.lockInterruptibly();
         try {
@@ -657,8 +652,7 @@ class LinkedBlockingDeque<E> extends AbstractQueue<E>
      * @return the unlinked element
      * @throws InterruptedException if the current thread is interrupted
      */
-    public E pollLast(final long timeout, final TimeUnit unit)
-            throws InterruptedException {
+    public E pollLast(final long timeout, final TimeUnit unit) throws InterruptedException {
         long nanos = unit.toNanos(timeout);
         lock.lockInterruptibly();
         try {
@@ -1346,8 +1340,7 @@ class LinkedBlockingDeque<E> extends AbstractQueue<E>
      * @serialData The capacity (int), followed by elements (each an
      * {@code Object}) in the proper order, followed by a null
      */
-    private void writeObject(final java.io.ObjectOutputStream s)
-            throws java.io.IOException {
+    private void writeObject(final java.io.ObjectOutputStream s) throws java.io.IOException {
         lock.lock();
         try {
             // Write out capacity and any hidden stuff
@@ -1369,8 +1362,7 @@ class LinkedBlockingDeque<E> extends AbstractQueue<E>
      *
      * @param s the stream
      */
-    private void readObject(final java.io.ObjectInputStream s)
-            throws java.io.IOException, ClassNotFoundException {
+    private void readObject(final java.io.ObjectInputStream s) throws java.io.IOException, ClassNotFoundException {
         s.defaultReadObject();
         count = 0;
         first = null;

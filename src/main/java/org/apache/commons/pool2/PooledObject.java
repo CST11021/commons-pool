@@ -42,7 +42,7 @@ public interface PooledObject<T> extends Comparable<PooledObject<T>> {
     long getCreateTime();
 
     /**
-     * 上一次处于活动状态所花费的时间（以毫秒为单位）
+     * 获取上一次借出去到现在的间隔时间（以毫秒为单位）
      *
      * @return
      */
@@ -80,31 +80,23 @@ public interface PooledObject<T> extends Comparable<PooledObject<T>> {
     long getLastReturnTime();
 
     /**
-     * Returns an estimate of the last time this object was used.  If the class
-     * of the pooled object implements {@link TrackedUse}, what is returned is
-     * the maximum of {@link TrackedUse#getLastUsed()} and
-     * {@link #getLastBorrowTime()}; otherwise this method gives the same
-     * value as {@link #getLastBorrowTime()}.
+     * 返回上次使用时间的一个估计值，如果Pooled Object实现了TrackedUse接口，那么返回值将是TrackedUse.getLastUsed()和getLastBorrowTime()的较大者，否则返回值和getLastBorrowTime()相等
      *
      * @return the last time this object was used
      */
     long getLastUsedTime();
 
     /**
-     * Attempts to place the pooled object in the
-     * {@link PooledObjectState#EVICTION} state.
+     * 尝试将池对象置于{@link PooledObjectState#EVICTION}状态
      *
-     * @return <code>true</code> if the object was placed in the
-     * {@link PooledObjectState#EVICTION} state otherwise
-     * <code>false</code>
+     * @return 设置成功时返回true
      */
     boolean startEvictionTest();
 
     /**
      * Called to inform the object that the eviction test has ended.
      *
-     * @param idleQueue The queue of idle objects to which the object should be
-     *                  returned
+     * @param idleQueue The queue of idle objects to which the object should be returned
      * @return Currently not used
      */
     boolean endEvictionTest(Deque<PooledObject<T>> idleQueue);
@@ -124,17 +116,14 @@ public interface PooledObject<T> extends Comparable<PooledObject<T>> {
     boolean deallocate();
 
     /**
-     * Sets the state to {@link PooledObjectState#INVALID INVALID}
+     * 将对象置为{@link PooledObjectState#INVALID}无效状态
      */
     void invalidate();
 
     /**
-     * Is abandoned object tracking being used? If this is true the
-     * implementation will need to record the stack trace of the last caller to
-     * borrow this object.
+     * 设置是否记录对象使用的堆栈信息，可用于池泄漏时问题追溯
      *
-     * @param logAbandoned The new configuration setting for abandoned
-     *                     object tracking
+     * @param logAbandoned The new configuration setting for abandonedobject tracking
      */
     void setLogAbandoned(boolean logAbandoned);
 
@@ -177,7 +166,7 @@ public interface PooledObject<T> extends Comparable<PooledObject<T>> {
     void markAbandoned();
 
     /**
-     * Marks the object as returning to the pool.
+     * 将对象标记为归还状态
      */
     void markReturning();
 

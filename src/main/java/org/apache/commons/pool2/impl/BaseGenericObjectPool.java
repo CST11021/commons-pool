@@ -67,12 +67,17 @@ public abstract class BaseGenericObjectPool<T> extends BaseObject {
     private volatile int maxTotal = GenericKeyedObjectPoolConfig.DEFAULT_MAX_TOTAL;
     /** 当对象池耗尽时（即达到“活动”对象的最大数量），调用roweObject()方法是否阻塞 */
     private volatile boolean blockWhenExhausted = BaseObjectPoolConfig.DEFAULT_BLOCK_WHEN_EXHAUSTED;
+    /** 向对象池借用对象的最大等待时间 */
     private volatile long maxWaitMillis = BaseObjectPoolConfig.DEFAULT_MAX_WAIT_MILLIS;
     private volatile boolean lifo = BaseObjectPoolConfig.DEFAULT_LIFO;
     private final boolean fairness;
+    /** 表示向对象池添加对象前，是否需要进行检查，如果检查不通过，则不会将对象添加到池子里 */
     private volatile boolean testOnCreate = BaseObjectPoolConfig.DEFAULT_TEST_ON_CREATE;
+    /** 表示从对象池借出对象前，是否需要进行检查，如果检查不通过，则不会将对象借出去 */
     private volatile boolean testOnBorrow = BaseObjectPoolConfig.DEFAULT_TEST_ON_BORROW;
+    /** 表示从对象归还到池子前，是否需要进行检查 */
     private volatile boolean testOnReturn = BaseObjectPoolConfig.DEFAULT_TEST_ON_RETURN;
+    /** 表示是否要对池子里的空闲对象进行校验 */
     private volatile boolean testWhileIdle = BaseObjectPoolConfig.DEFAULT_TEST_WHILE_IDLE;
     private volatile long timeBetweenEvictionRunsMillis = BaseObjectPoolConfig.DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS;
     private volatile int numTestsPerEvictionRun = BaseObjectPoolConfig.DEFAULT_NUM_TESTS_PER_EVICTION_RUN;
@@ -366,11 +371,7 @@ public abstract class BaseGenericObjectPool<T> extends BaseObject {
     }
 
     /**
-     * Returns whether objects borrowed from the pool will be validated when
-     * they are returned to the pool via the <code>returnObject()</code> method.
-     * Validation is performed by the <code>validateObject()</code> method of
-     * the factory associated with the pool. Returning objects that fail validation
-     * are destroyed rather then being returned the pool.
+     * 是否在对象归还前进行检查测试，检查通过才能放回池子里
      *
      * @return <code>true</code> if objects are validated on return to
      * the pool via the <code>returnObject()</code> method
@@ -937,14 +938,17 @@ public abstract class BaseGenericObjectPool<T> extends BaseObject {
     }
 
     /**
-     * Updates statistics after an object is borrowed from the pool.
+     * 从池中借用对象后更新统计信息
      *
      * @param p        object borrowed from the pool
-     * @param waitTime time (in milliseconds) that the borrowing thread had to wait
+     * @param waitTime 借用过程花费的时间（以毫秒为单位）
      */
     final void updateStatsBorrow(final PooledObject<T> p, final long waitTime) {
+        // 将对象被借出去的次数+1
         borrowedCount.incrementAndGet();
+        // 获取该对象上次处于空闲状态距离现在的时间（以毫秒为单位），并放到队列中
         idleTimes.add(p.getIdleTimeMillis());
+        // 添加用过程花费的时间
         waitTimes.add(waitTime);
 
         // lock-free optimistic-locking maximum
@@ -969,7 +973,7 @@ public abstract class BaseGenericObjectPool<T> extends BaseObject {
     }
 
     /**
-     * Marks the object as returning to the pool.
+     * 将对象标记为归还状态
      *
      * @param pooledObject instance to return to the keyed pool
      */
@@ -977,10 +981,11 @@ public abstract class BaseGenericObjectPool<T> extends BaseObject {
         synchronized (pooledObject) {
             final PooledObjectState state = pooledObject.getState();
             if (state != PooledObjectState.ALLOCATED) {
-                throw new IllegalStateException(
-                        "Object has already been returned to this pool or is invalid");
+                throw new IllegalStateException("Object has already been returned to this pool or is invalid");
             }
-            pooledObject.markReturning(); // Keep from being marked abandoned
+
+            // 将对象标记为归还状态
+            pooledObject.markReturning();
         }
     }
 

@@ -99,7 +99,7 @@ public interface PooledObjectFactory<T> {
     void destroyObject(PooledObject<T> p) throws Exception;
 
     /**
-     * 检查该对象实例是否可以安全地归还到池中，如果对象无效，应将其从池中删除，此时返回false
+     * 检查该对象实例是否是初始化的状态，当对象被借出去前，或者归还到池子前都会调用该方法，如果对象无效，则无法借出或者归还会池子，此时返回false
      *
      * @param p
      * @return
@@ -107,7 +107,7 @@ public interface PooledObjectFactory<T> {
     boolean validateObject(PooledObject<T> p);
 
     /**
-     * 重新初始化要由池返回的实例
+     * 当对象被借出去前都会调用该方法，给对象进行初始化，初始化完成后，才允许借出
      *
      * @param p a {@code PooledObject} wrapping the instance to be activated
      * @throws Exception if there is a problem activating <code>obj</code>,
@@ -117,7 +117,7 @@ public interface PooledObjectFactory<T> {
     void activateObject(PooledObject<T> p) throws Exception;
 
     /**
-     * 取消初始化要返回到空闲对象池的实例
+     * 反初始化，每次回收的时候都会执行这个方法
      *
      * @param p a {@code PooledObject} wrapping the instance to be passivated
      * @throws Exception if there is a problem passivating <code>obj</code>,

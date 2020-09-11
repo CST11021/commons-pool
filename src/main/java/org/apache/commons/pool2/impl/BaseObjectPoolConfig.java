@@ -479,8 +479,7 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
      * Set the value for the {@code testWhileIdle} configuration attribute for
      * pools created with this configuration instance.
      *
-     * @param testWhileIdle The new setting of {@code testWhileIdle}
-     *                      for this configuration instance
+     * @param testWhileIdle The new setting of {@code testWhileIdle} for this configuration instance
      * @see GenericObjectPool#getTestWhileIdle()
      * @see GenericKeyedObjectPool#getTestWhileIdle()
      */

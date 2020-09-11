@@ -66,6 +66,11 @@ public class DefaultPooledObject<T> implements PooledObject<T> {
         return createTime;
     }
 
+    /**
+     * 获取上一次借出去到现在的间隔时间（以毫秒为单位）
+     *
+     * @return
+     */
     @Override
     public long getActiveTimeMillis() {
         // Take copies to avoid threading issues
@@ -179,7 +184,7 @@ public class DefaultPooledObject<T> implements PooledObject<T> {
     }
 
     /**
-     * Allocates the object.
+     * 只有对象是空闲状态的时候，才允许借出
      *
      * @return {@code true} if the original state was {@link PooledObjectState#IDLE IDLE}
      */
@@ -187,6 +192,7 @@ public class DefaultPooledObject<T> implements PooledObject<T> {
     public synchronized boolean allocate() {
         if (state == PooledObjectState.IDLE) {
             state = PooledObjectState.ALLOCATED;
+            // 设置最后借出的时间
             lastBorrowTime = System.currentTimeMillis();
             lastUseTime = lastBorrowTime;
             borrowedCount++;
@@ -265,7 +271,7 @@ public class DefaultPooledObject<T> implements PooledObject<T> {
     }
 
     /**
-     * Marks the object as returning to the pool.
+     * 将对象标记为归还状态
      */
     @Override
     public synchronized void markReturning() {

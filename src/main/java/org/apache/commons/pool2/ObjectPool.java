@@ -106,41 +106,6 @@ public interface ObjectPool<T> extends Closeable {
     T borrowObject() throws Exception, NoSuchElementException, IllegalStateException;
 
     /**
-     * 清除池中空闲的所有对象，释放任何关联的资源（可选操作）。清除的空闲对象必须为{@link PooledObjectFactory#destroyObject(PooledObject)}
-     *
-     * @throws UnsupportedOperationException if this implementation does not support the operation
-     * @throws Exception                     if the pool cannot be cleared
-     */
-    void clear() throws Exception, UnsupportedOperationException;
-
-    /**
-     * Closes this pool, and free any resources associated with it.
-     * <p>
-     * Calling {@link #addObject} or {@link #borrowObject} after invoking this
-     * method on a pool will cause them to throw an {@link IllegalStateException}.
-     * </p>
-     * <p>
-     * Implementations should silently fail if not all resources can be freed.
-     * </p>
-     */
-    @Override
-    void close();
-
-    /**
-     * 获得被借出对象数量，如果该池处于非活动状态，则为-1
-     *
-     * @return the number of instances currently borrowed from this pool.
-     */
-    int getNumActive();
-
-    /**
-     * 当前在该池中空闲的实例数，如果该池处于非活动状态，则为-1
-     *
-     * @return the number of instances currently idle in this pool.
-     */
-    int getNumIdle();
-
-    /**
      * 使池中的该对象实例无效
      *
      * @param obj a {@link #borrowObject borrowed} instance to be disposed.
@@ -160,4 +125,40 @@ public interface ObjectPool<T> extends Closeable {
      * @throws Exception             if an instance cannot be returned to the pool
      */
     void returnObject(T obj) throws Exception;
+
+    /**
+     * 清除池中空闲的所有对象，释放任何关联的资源（可选操作）。清除的空闲对象必须为{@link PooledObjectFactory#destroyObject(PooledObject)}
+     *
+     * @throws UnsupportedOperationException if this implementation does not support the operation
+     * @throws Exception                     if the pool cannot be cleared
+     */
+    void clear() throws Exception, UnsupportedOperationException;
+
+    /**
+     * 获得被借出对象数量，如果该池处于非活动状态，则为-1
+     *
+     * @return the number of instances currently borrowed from this pool.
+     */
+    int getNumActive();
+
+    /**
+     * 当前在该池中空闲的实例数，如果该池处于非活动状态，则为-1
+     *
+     * @return the number of instances currently idle in this pool.
+     */
+    int getNumIdle();
+
+    /**
+     * Closes this pool, and free any resources associated with it.
+     * <p>
+     * Calling {@link #addObject} or {@link #borrowObject} after invoking this
+     * method on a pool will cause them to throw an {@link IllegalStateException}.
+     * </p>
+     * <p>
+     * Implementations should silently fail if not all resources can be freed.
+     * </p>
+     */
+    @Override
+    void close();
+
 }

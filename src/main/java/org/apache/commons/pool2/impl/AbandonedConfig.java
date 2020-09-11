@@ -29,9 +29,7 @@ import java.io.PrintWriter;
  */
 public class AbandonedConfig {
 
-    /**
-     * 是否移除被借出去的对象
-     */
+    /** 是否移除被借出去的对象 */
     private boolean removeAbandonedOnBorrow = false;
 
 
@@ -79,7 +77,7 @@ public class AbandonedConfig {
     }
 
     /**
-     * Timeout in seconds before an abandoned object can be removed.
+     * 可以删除废弃对象之前的秒数
      */
     private int removeAbandonedTimeout = 300;
 
