@@ -77,7 +77,7 @@ public abstract class BaseGenericObjectPool<T> extends BaseObject {
     private volatile boolean testOnBorrow = BaseObjectPoolConfig.DEFAULT_TEST_ON_BORROW;
     /** 表示从对象归还到池子前，是否需要进行检查 */
     private volatile boolean testOnReturn = BaseObjectPoolConfig.DEFAULT_TEST_ON_RETURN;
-    /** 表示是否要对池子里的空闲对象进行校验 */
+    /** 表示是否要对池子里的空闲对象进行校验：驱逐测试后，如果对象还保留在池子里，则再次对该对象进行初始化和反初始化测试，测试失败，则销毁对象 */
     private volatile boolean testWhileIdle = BaseObjectPoolConfig.DEFAULT_TEST_WHILE_IDLE;
 
 

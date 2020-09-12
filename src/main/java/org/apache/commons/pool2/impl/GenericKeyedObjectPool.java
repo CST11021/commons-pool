@@ -731,6 +731,7 @@ public class GenericKeyedObjectPool<K, T> extends BaseGenericObjectPool<T> imple
         final EvictionPolicy<T> evictionPolicy = getEvictionPolicy();
 
         synchronized (evictionLock) {
+            // 获取驱逐测试配置
             final EvictionConfig evictionConfig = new EvictionConfig(
                     getMinEvictableIdleTimeMillis(),
                     getSoftMinEvictableIdleTimeMillis(),
@@ -739,9 +740,10 @@ public class GenericKeyedObjectPool<K, T> extends BaseGenericObjectPool<T> imple
             final boolean testWhileIdle = getTestWhileIdle();
 
             for (int i = 0, m = getNumTests(); i < m; i++) {
+
+                // 初始化迭代器
                 if (evictionIterator == null || !evictionIterator.hasNext()) {
-                    if (evictionKeyIterator == null ||
-                            !evictionKeyIterator.hasNext()) {
+                    if (evictionKeyIterator == null || !evictionKeyIterator.hasNext()) {
                         final List<K> keyCopy = new ArrayList<>();
                         final Lock readLock = keyLock.readLock();
                         readLock.lock();
@@ -752,6 +754,7 @@ public class GenericKeyedObjectPool<K, T> extends BaseGenericObjectPool<T> imple
                         }
                         evictionKeyIterator = keyCopy.iterator();
                     }
+
                     while (evictionKeyIterator.hasNext()) {
                         evictionKey = evictionKeyIterator.next();
                         final ObjectDeque<T> objectDeque = poolMap.get(evictionKey);
@@ -767,49 +770,53 @@ public class GenericKeyedObjectPool<K, T> extends BaseGenericObjectPool<T> imple
                         evictionIterator = null;
                     }
                 }
+
+                // 如果迭代器初始化后，还是空的，说明没有空闲的对象
                 if (evictionIterator == null) {
                     // Pools exhausted
                     return;
                 }
+
+                // 获取本次要测试的对象
                 final Deque<PooledObject<T>> idleObjects;
                 try {
                     underTest = evictionIterator.next();
                     idleObjects = evictionIterator.getIdleObjects();
                 } catch (final NoSuchElementException nsee) {
-                    // Object was borrowed in another thread
-                    // Don't count this as an eviction test so reduce i;
+                    // Object was borrowed in another thread Don't count this as an eviction test so reduce i;
                     i--;
                     evictionIterator = null;
                     continue;
                 }
 
+                // 标记为开始进行驱逐测试
                 if (!underTest.startEvictionTest()) {
-                    // Object was borrowed in another thread
-                    // Don't count this as an eviction test so reduce i;
+                    // 在另一个线程中借用了对象。不要将此作为驱逐测试，因此减少i；
                     i--;
                     continue;
                 }
 
-                // User provided eviction policy could throw all sorts of
-                // crazy exceptions. Protect against such an exception
-                // killing the eviction thread.
+
+                // 进行驱逐测试
                 boolean evict;
                 try {
-                    evict = evictionPolicy.evict(evictionConfig, underTest,
-                            poolMap.get(evictionKey).getIdleObjects().size());
+                    // 用户提供的驱逐策略可能引发各种疯狂的异常，防止此类异常杀死驱逐线程。
+                    evict = evictionPolicy.evict(evictionConfig, underTest, poolMap.get(evictionKey).getIdleObjects().size());
                 } catch (final Throwable t) {
-                    // Slightly convoluted as SwallowedExceptionListener
-                    // uses Exception rather than Throwable
+                    // Slightly convoluted as SwallowedExceptionListener uses Exception rather than Throwable
                     PoolUtils.checkRethrow(t);
                     swallowException(new Exception(t));
                     // Don't evict on error conditions
                     evict = false;
                 }
 
+                // evict = true 时，表示驱逐测试通过，则将该对象进行销毁
                 if (evict) {
                     destroy(evictionKey, underTest, true);
                     destroyedByEvictorCount.incrementAndGet();
                 } else {
+
+                    // testWhileIdle = true 时，驱逐测试后，如果对象还保留在池子里，则再次对该对象进行初始化和反初始化测试，测试失败，则销毁对象
                     if (testWhileIdle) {
                         boolean active = false;
                         try {
@@ -819,6 +826,7 @@ public class GenericKeyedObjectPool<K, T> extends BaseGenericObjectPool<T> imple
                             destroy(evictionKey, underTest, true);
                             destroyedByEvictorCount.incrementAndGet();
                         }
+
                         if (active) {
                             if (!factory.validateObject(evictionKey, underTest)) {
                                 destroy(evictionKey, underTest, true);
@@ -833,6 +841,8 @@ public class GenericKeyedObjectPool<K, T> extends BaseGenericObjectPool<T> imple
                             }
                         }
                     }
+
+                    // 通知对象驱逐测试结束
                     if (!underTest.endEvictionTest(idleObjects)) {
                         // TODO - May need to add code here once additional
                         // states are used
