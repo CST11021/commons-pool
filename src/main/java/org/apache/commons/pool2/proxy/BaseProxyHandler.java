@@ -21,8 +21,7 @@ import java.lang.reflect.Method;
 import org.apache.commons.pool2.UsageTracking;
 
 /**
- * Base implementation for object wrappers when using a
- * {@link ProxiedObjectPool}.
+ * Base implementation for object wrappers when using a {@link ProxiedObjectPool}.
  *
  * @param <T> type of the wrapped pooled object
  * @since 2.0
@@ -46,7 +45,6 @@ class BaseProxyHandler<T> {
         this.usageTracking = usageTracking;
     }
 
-
     /**
      * Obtain the wrapped, pooled object.
      *
@@ -55,7 +53,6 @@ class BaseProxyHandler<T> {
     T getPooledObject() {
         return pooledObject;
     }
-
 
     /**
      * Disable the proxy wrapper. Called when the object has been returned to
@@ -70,7 +67,6 @@ class BaseProxyHandler<T> {
         return result;
     }
 
-
     /**
      * Check that the proxy is still valid (i.e. that {@link #disableProxy()}
      * has not been called).
@@ -79,11 +75,9 @@ class BaseProxyHandler<T> {
      */
     void validateProxiedObject() {
         if (pooledObject == null) {
-            throw new IllegalStateException("This object may no longer be " +
-                    "used as it has been returned to the Object Pool.");
+            throw new IllegalStateException("This object may no longer be used as it has been returned to the Object Pool.");
         }
     }
-
 
     /**
      * Invoke the given method on the wrapped object.
@@ -96,12 +90,12 @@ class BaseProxyHandler<T> {
     Object doInvoke(final Method method, final Object[] args) throws Throwable {
         validateProxiedObject();
         final T object = getPooledObject();
+        // 池对象的方法被调用时，都会通过usageTracking.use()方法进行跟踪
         if (usageTracking != null) {
             usageTracking.use(object);
         }
         return method.invoke(object, args);
     }
-
 
     /**
      * @since 2.4.3

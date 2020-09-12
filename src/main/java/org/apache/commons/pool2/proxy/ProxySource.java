@@ -18,9 +18,10 @@ package org.apache.commons.pool2.proxy;
 
 import org.apache.commons.pool2.UsageTracking;
 
+import java.lang.reflect.Method;
+
 /**
- * The interface that any provider of proxy instances must implement to allow the
- * {@link ProxiedObjectPool} to create proxies as required.
+ * 代理池对象，提供了池对象的堆栈跟踪功能
  *
  * @param <T> type of the pooled object to be proxied
  * @since 2.0
@@ -28,18 +29,17 @@ import org.apache.commons.pool2.UsageTracking;
 interface ProxySource<T> {
 
     /**
-     * Create a new proxy object, wrapping the given pooled object.
+     * 创建一个代理对象，该代理对象提供了这样的一个能力：池对象的任何方法被调用时，都会触发UsageTracking#use()方法，进行堆栈跟踪，
+     * 详细请参照：{@link BaseProxyHandler#doInvoke(Method, Object[])}
      *
-     * @param pooledObject  The object to wrap
-     * @param usageTracking The instance, if any (usually the object pool) to
-     *                      be provided with usage tracking information for this
-     *                      wrapped object
+     * @param pooledObject  被代理的池对象（即原始的池对象）
+     * @param usageTracking 实例（如果有的话）（通常是对象池）将为此包装的对象提供使用情况跟踪信息
      * @return the new proxy object
      */
     T createProxy(T pooledObject, UsageTracking<T> usageTracking);
 
     /**
-     * Obtain the wrapped object from the given proxy.
+     * 获取原始的池对象
      *
      * @param proxy The proxy object
      * @return The pooled object wrapped by the given proxy

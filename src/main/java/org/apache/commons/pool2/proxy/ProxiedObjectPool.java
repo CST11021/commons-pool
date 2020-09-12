@@ -32,16 +32,12 @@ import org.apache.commons.pool2.UsageTracking;
  */
 public class ProxiedObjectPool<T> implements ObjectPool<T> {
 
+    /** 原始的对象池 */
     private final ObjectPool<T> pool;
+    /** 用于创建代理对象，该对象对原始的池对象又包了一层 */
     private final ProxySource<T> proxySource;
 
 
-    /**
-     * Create a new proxied object pool.
-     *
-     * @param pool        The object pool to wrap
-     * @param proxySource The source of the proxy objects
-     */
     public ProxiedObjectPool(final ObjectPool<T> pool, final ProxySource<T> proxySource) {
         this.pool = pool;
         this.proxySource = proxySource;
@@ -50,10 +46,22 @@ public class ProxiedObjectPool<T> implements ObjectPool<T> {
 
     // --------------------------------------------------- ObjectPool<T> methods
 
+    @Override
+    public void addObject() throws Exception, IllegalStateException, UnsupportedOperationException {
+        pool.addObject();
+    }
+
+    /**
+     * 从对象池借用一个对象，该对象被封装为代理对象返回
+     *
+     * @return
+     * @throws Exception
+     * @throws NoSuchElementException
+     * @throws IllegalStateException
+     */
     @SuppressWarnings("unchecked")
     @Override
-    public T borrowObject() throws Exception, NoSuchElementException,
-            IllegalStateException {
+    public T borrowObject() throws Exception, NoSuchElementException, IllegalStateException {
         UsageTracking<T> usageTracking = null;
         if (pool instanceof UsageTracking) {
             usageTracking = (UsageTracking<T>) pool;
@@ -63,51 +71,49 @@ public class ProxiedObjectPool<T> implements ObjectPool<T> {
         return proxy;
     }
 
-
+    /**
+     * 将代理对象归还回对象池，归还时，先通过 proxySource 获取原始的池对象，然后再进行归还
+     *
+     * @param proxy
+     * @throws Exception
+     */
     @Override
     public void returnObject(final T proxy) throws Exception {
         final T pooledObject = proxySource.resolveProxy(proxy);
         pool.returnObject(pooledObject);
     }
 
-
+    /**
+     * 将对象置为失效状态
+     *
+     * @param proxy
+     * @throws Exception
+     */
     @Override
     public void invalidateObject(final T proxy) throws Exception {
         final T pooledObject = proxySource.resolveProxy(proxy);
         pool.invalidateObject(pooledObject);
     }
 
-
-    @Override
-    public void addObject() throws Exception, IllegalStateException,
-            UnsupportedOperationException {
-        pool.addObject();
-    }
-
-
     @Override
     public int getNumIdle() {
         return pool.getNumIdle();
     }
-
 
     @Override
     public int getNumActive() {
         return pool.getNumActive();
     }
 
-
     @Override
     public void clear() throws Exception, UnsupportedOperationException {
         pool.clear();
     }
 
-
     @Override
     public void close() {
         pool.close();
     }
-
 
     /**
      * @since 2.4.3

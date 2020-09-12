@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * 一般的对象池
+ * 常用的对象池
  *
  * @param <T> Type of element pooled in this pool.
  * @see GenericKeyedObjectPool

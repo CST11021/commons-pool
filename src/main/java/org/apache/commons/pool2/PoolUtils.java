@@ -650,20 +650,16 @@ public final class PoolUtils {
     }
 
     /**
-     * A synchronized (thread-safe) ObjectPool backed by the specified
-     * ObjectPool.
-     * <p>
-     * <b>Note:</b> This should not be used on pool implementations that already
-     * provide proper synchronization such as the pools provided in the Commons
-     * Pool library. Wrapping a pool that {@link #wait() waits} for poolable
-     * objects to be returned before allowing another one to be borrowed with
-     * another layer of synchronization will cause liveliness issues or a
-     * deadlock.
-     * </p>
+     * 同步的对象池
      *
-     * @param <T> type of objects in the pool
+     * @param <T>
      */
     private static final class SynchronizedObjectPool<T> implements ObjectPool<T> {
+
+        /**
+         * the underlying object pool
+         */
+        private final ObjectPool<T> pool;
 
         /**
          * Object whose monitor is used to synchronize methods on the wrapped
@@ -672,31 +668,39 @@ public final class PoolUtils {
         private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
 
         /**
-         * the underlying object pool
-         */
-        private final ObjectPool<T> pool;
-
-        /**
          * Creates a new SynchronizedObjectPool wrapping the given pool.
          *
          * @param pool the ObjectPool to be "wrapped" in a synchronized
          *             ObjectPool.
          * @throws IllegalArgumentException if the pool is null
          */
-        SynchronizedObjectPool(final ObjectPool<T> pool)
-                throws IllegalArgumentException {
+        SynchronizedObjectPool(final ObjectPool<T> pool) throws IllegalArgumentException {
             if (pool == null) {
                 throw new IllegalArgumentException(MSG_NULL_POOL);
             }
             this.pool = pool;
         }
 
+        // 使用写锁的方法
+
         /**
          * {@inheritDoc}
          */
         @Override
-        public T borrowObject() throws Exception, NoSuchElementException,
-                IllegalStateException {
+        public void addObject() throws Exception, IllegalStateException, UnsupportedOperationException {
+            final WriteLock writeLock = readWriteLock.writeLock();
+            writeLock.lock();
+            try {
+                pool.addObject();
+            } finally {
+                writeLock.unlock();
+            }
+        }
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public T borrowObject() throws Exception, NoSuchElementException, IllegalStateException {
             final WriteLock writeLock = readWriteLock.writeLock();
             writeLock.lock();
             try {
@@ -705,7 +709,6 @@ public final class PoolUtils {
                 writeLock.unlock();
             }
         }
-
         /**
          * {@inheritDoc}
          */
@@ -721,7 +724,6 @@ public final class PoolUtils {
                 writeLock.unlock();
             }
         }
-
         /**
          * {@inheritDoc}
          */
@@ -738,20 +740,7 @@ public final class PoolUtils {
             }
         }
 
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public void addObject() throws Exception, IllegalStateException,
-                UnsupportedOperationException {
-            final WriteLock writeLock = readWriteLock.writeLock();
-            writeLock.lock();
-            try {
-                pool.addObject();
-            } finally {
-                writeLock.unlock();
-            }
-        }
+        // 使用读锁的方法
 
         /**
          * {@inheritDoc}
@@ -766,7 +755,6 @@ public final class PoolUtils {
                 readLock.unlock();
             }
         }
-
         /**
          * {@inheritDoc}
          */
@@ -1281,6 +1269,7 @@ public final class PoolUtils {
      * frequently.
      */
     private static final class ErodingFactor {
+
         /**
          * Determines frequency of "erosion" events
          */
@@ -1303,12 +1292,8 @@ public final class PoolUtils {
          */
         public ErodingFactor(final float factor) {
             this.factor = factor;
-            nextShrink = System.currentTimeMillis() + (long) (900000 * factor); // now
-            // +
-            // 15
-            // min
-            // *
-            // factor
+            // now + 15min * factor
+            nextShrink = System.currentTimeMillis() + (long) (900000 * factor);
             idleHighWaterMark = 1;
         }
 
@@ -1347,9 +1332,8 @@ public final class PoolUtils {
     }
 
     /**
-     * Decorates an object pool, adding "eroding" behavior. Based on the
-     * configured {@link #factor erosion factor}, objects returning to the pool
-     * may be invalidated instead of being added to idle capacity.
+     * 装饰对象池，添加“eroding”行为。
+     * Based on the configured {@link #factor erosion factor}, objects returning to the pool may be invalidated instead of being added to idle capacity.
      *
      * @param <T> type of objects in the pool
      */
@@ -1383,28 +1367,21 @@ public final class PoolUtils {
          * {@inheritDoc}
          */
         @Override
-        public T borrowObject() throws Exception, NoSuchElementException,
-                IllegalStateException {
+        public T borrowObject() throws Exception, NoSuchElementException, IllegalStateException {
             return pool.borrowObject();
         }
 
         /**
-         * Returns obj to the pool, unless erosion is triggered, in which case
-         * obj is invalidated. Erosion is triggered when there are idle
-         * instances in the pool and more than the {@link #factor erosion
-         * factor}-determined time has elapsed since the last returnObject
-         * activation.
+         * 归还时已经超过了规定的时间并且池中仍然还有空闲对象的时候，则将该对象销毁掉，否则继续放回池子里
          *
-         * @param obj object to return or invalidate
-         * @see #factor
+         * @param obj a {@link #borrowObject borrowed} instance to be returned.
          */
         @Override
         public void returnObject(final T obj) {
             boolean discard = false;
             final long now = System.currentTimeMillis();
             synchronized (pool) {
-                if (factor.getNextShrink() < now) { // XXX: Pool 3: move test
-                    // out of sync block
+                if (factor.getNextShrink() < now) {
                     final int numIdle = pool.getNumIdle();
                     if (numIdle > 0) {
                         discard = true;
@@ -1413,6 +1390,8 @@ public final class PoolUtils {
                     factor.update(now, numIdle);
                 }
             }
+
+
             try {
                 if (discard) {
                     pool.invalidateObject(obj);
@@ -1440,8 +1419,7 @@ public final class PoolUtils {
          * {@inheritDoc}
          */
         @Override
-        public void addObject() throws Exception, IllegalStateException,
-                UnsupportedOperationException {
+        public void addObject() throws Exception, IllegalStateException, UnsupportedOperationException {
             pool.addObject();
         }
 

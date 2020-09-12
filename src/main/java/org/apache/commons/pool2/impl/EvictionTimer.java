@@ -81,8 +81,9 @@ class EvictionTimer {
             executor = new ScheduledThreadPoolExecutor(1, new EvictorThreadFactory());
             executor.setRemoveOnCancelPolicy(true);
         }
-        final ScheduledFuture<?> scheduledFuture =
-                executor.scheduleWithFixedDelay(task, delay, period, TimeUnit.MILLISECONDS);
+
+        // 创建一个定时任务
+        final ScheduledFuture<?> scheduledFuture = executor.scheduleWithFixedDelay(task, delay, period, TimeUnit.MILLISECONDS);
         task.setScheduledFuture(scheduledFuture);
     }
 
@@ -99,6 +100,7 @@ class EvictionTimer {
         if (evictor != null) {
             evictor.cancel();
         }
+
         if (executor != null && executor.getQueue().isEmpty()) {
             executor.shutdown();
             try {

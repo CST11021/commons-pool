@@ -45,20 +45,19 @@ public class CglibProxySource<T> implements ProxySource<T> {
         final Enhancer enhancer = new Enhancer();
         enhancer.setSuperclass(superclass);
 
-        final CglibProxyHandler<T> proxyInterceptor =
-                new CglibProxyHandler<>(pooledObject, usageTracking);
+        final CglibProxyHandler<T> proxyInterceptor = new CglibProxyHandler<>(pooledObject, usageTracking);
         enhancer.setCallback(proxyInterceptor);
 
-        @SuppressWarnings("unchecked") final T proxy = (T) enhancer.create();
+        @SuppressWarnings("unchecked")
+        final T proxy = (T) enhancer.create();
 
         return proxy;
     }
 
-
     @Override
     public T resolveProxy(final T proxy) {
-        @SuppressWarnings("unchecked") final CglibProxyHandler<T> cglibProxyHandler =
-                (CglibProxyHandler<T>) ((Factory) proxy).getCallback(0);
+        @SuppressWarnings("unchecked")
+        final CglibProxyHandler<T> cglibProxyHandler = (CglibProxyHandler<T>) ((Factory) proxy).getCallback(0);
         final T pooledObject = cglibProxyHandler.disableProxy();
         return pooledObject;
     }

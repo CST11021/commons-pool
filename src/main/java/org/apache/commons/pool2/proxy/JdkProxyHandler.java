@@ -27,8 +27,7 @@ import org.apache.commons.pool2.UsageTracking;
  * @param <T> type of the wrapped pooled object
  * @since 2.0
  */
-class JdkProxyHandler<T> extends BaseProxyHandler<T>
-        implements InvocationHandler {
+class JdkProxyHandler<T> extends BaseProxyHandler<T> implements InvocationHandler {
 
     /**
      * Create a Java reflection proxy instance.

@@ -60,9 +60,9 @@ public interface ObjectPool<T> extends Closeable {
     /**
      * 创建一个对象，并放到对象池
      *
-     * @throws Exception                     when {@link PooledObjectFactory#makeObject} fails.
-     * @throws IllegalStateException         after {@link #close} has been called on this pool.
-     * @throws UnsupportedOperationException when this pool cannot add new idle objects.
+     * @throws Exception
+     * @throws IllegalStateException
+     * @throws UnsupportedOperationException
      */
     void addObject() throws Exception, IllegalStateException, UnsupportedOperationException;
 

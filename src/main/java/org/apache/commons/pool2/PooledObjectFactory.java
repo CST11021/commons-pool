@@ -73,28 +73,16 @@ public interface PooledObjectFactory<T> {
     /**
      * 创建一个对象实例，并将其包装在{@link PooledObject}中，以便由池进行管理
      *
-     * @return a {@code PooledObject} wrapping an instance that can be served by the pool
-     * @throws Exception if there is a problem creating a new instance, this will be propagated to the code requesting an object.
+     * @return
+     * @throws Exception
      */
     PooledObject<T> makeObject() throws Exception;
 
     /**
      * 销毁该对象实例
-     * <p>
-     * It is important for implementations of this method to be aware that there
-     * is no guarantee about what state <code>obj</code> will be in and the
-     * implementation should be prepared to handle unexpected errors.
-     * </p>
-     * <p>
-     * Also, an implementation must take in to consideration that instances lost
-     * to the garbage collector may never be destroyed.
-     * </p>
      *
-     * @param p a {@code PooledObject} wrapping the instance to be destroyed
-     * @throws Exception should be avoided as it may be swallowed by
-     *                   the pool implementation.
-     * @see #validateObject
-     * @see ObjectPool#invalidateObject
+     * @param p
+     * @throws Exception
      */
     void destroyObject(PooledObject<T> p) throws Exception;
 
@@ -109,20 +97,16 @@ public interface PooledObjectFactory<T> {
     /**
      * 当对象被借出去前都会调用该方法，给对象进行初始化，初始化完成后，才允许借出
      *
-     * @param p a {@code PooledObject} wrapping the instance to be activated
-     * @throws Exception if there is a problem activating <code>obj</code>,
-     *                   this exception may be swallowed by the pool.
-     * @see #destroyObject
+     * @param p
+     * @throws Exception
      */
     void activateObject(PooledObject<T> p) throws Exception;
 
     /**
      * 反初始化，每次回收的时候都会执行这个方法
      *
-     * @param p a {@code PooledObject} wrapping the instance to be passivated
-     * @throws Exception if there is a problem passivating <code>obj</code>,
-     *                   this exception may be swallowed by the pool.
-     * @see #destroyObject
+     * @param p
+     * @throws Exception
      */
     void passivateObject(PooledObject<T> p) throws Exception;
 }
