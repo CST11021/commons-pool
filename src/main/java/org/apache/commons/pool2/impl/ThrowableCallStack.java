@@ -31,9 +31,10 @@ import java.text.SimpleDateFormat;
 public class ThrowableCallStack implements CallStack {
 
     private final String messageFormat;
-    //@GuardedBy("dateFormat")
+
     private final DateFormat dateFormat;
 
+    /** 异常堆栈的快照 */
     private volatile Snapshot snapshot;
 
     /**
@@ -47,12 +48,19 @@ public class ThrowableCallStack implements CallStack {
         this.dateFormat = useTimestamp ? new SimpleDateFormat(messageFormat) : null;
     }
 
+    /**
+     * 打印堆栈快照到指定的位置
+     *
+     * @param writer a PrintWriter to write the current stack trace to if available
+     * @return
+     */
     @Override
     public synchronized boolean printStackTrace(final PrintWriter writer) {
         final Snapshot snapshotRef = this.snapshot;
         if (snapshotRef == null) {
             return false;
         }
+
         final String message;
         if (dateFormat == null) {
             message = messageFormat;
@@ -66,11 +74,17 @@ public class ThrowableCallStack implements CallStack {
         return true;
     }
 
+    /**
+     * 创建堆栈快照
+     */
     @Override
     public void fillInStackTrace() {
         snapshot = new Snapshot();
     }
 
+    /**
+     * 清楚堆栈快照
+     */
     @Override
     public void clear() {
         snapshot = null;

@@ -18,11 +18,9 @@ package org.apache.commons.pool2;
 
 /**
  * {@link ObjectPool}的简单基础实现。
- * Optional operations are implemented to either do nothing, return a value
- * indicating it is unsupported or throw {@link UnsupportedOperationException}.
- * <p>
- * This class is intended to be thread-safe.
- * </p>
+ * 可选操作被实现为不执行任何操作，返回指示其不受支持的值或引发{@link UnsupportedOperationException}。
+ *
+ * 此类旨在实现线程安全
  *
  * @param <T> Type of element pooled in this pool.
  * @since 2.0
@@ -30,6 +28,8 @@ package org.apache.commons.pool2;
 public abstract class BaseObjectPool<T> extends BaseObject implements ObjectPool<T> {
 
     private volatile boolean closed = false;
+
+    // 抽象方法，交由子类实现
 
     @Override
     public abstract T borrowObject() throws Exception;
@@ -40,44 +40,25 @@ public abstract class BaseObjectPool<T> extends BaseObject implements ObjectPool
     @Override
     public abstract void invalidateObject(T obj) throws Exception;
 
-    /**
-     * Not supported in this base implementation.
-     *
-     * @return a negative value.
-     */
+
+
+    // 此基本实现中不支持的实现
+
     @Override
     public int getNumIdle() {
         return -1;
     }
 
-    /**
-     * Not supported in this base implementation.
-     *
-     * @return a negative value.
-     */
     @Override
     public int getNumActive() {
         return -1;
     }
 
-    /**
-     * Not supported in this base implementation.
-     *
-     * @throws UnsupportedOperationException if the pool does not implement this
-     *                                       method
-     */
     @Override
     public void clear() throws Exception, UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
-    /**
-     * Not supported in this base implementation. Subclasses should override
-     * this behavior.
-     *
-     * @throws UnsupportedOperationException if the pool does not implement this
-     *                                       method
-     */
     @Override
     public void addObject() throws Exception, UnsupportedOperationException {
         throw new UnsupportedOperationException();

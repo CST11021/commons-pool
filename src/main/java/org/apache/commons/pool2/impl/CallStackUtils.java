@@ -26,22 +26,9 @@ import java.security.AccessControlException;
 public final class CallStackUtils {
 
     /**
-     * Returns whether the caller can create a security manager in the current environment.
-     *
-     * @return {@code true} if it is able to create a security manager in the current environment, {@code false}
-     * otherwise.
+     * Hidden constructor.
      */
-    private static boolean canCreateSecurityManager() {
-        final SecurityManager manager = System.getSecurityManager();
-        if (manager == null) {
-            return true;
-        }
-        try {
-            manager.checkPermission(new RuntimePermission("createSecurityManager"));
-            return true;
-        } catch (final AccessControlException ignored) {
-            return false;
-        }
+    private CallStackUtils() {
     }
 
     /**
@@ -69,17 +56,31 @@ public final class CallStackUtils {
      * @return a new CallStack
      * @since 2.5
      */
-    public static CallStack newCallStack(final String messageFormat,
-                                         final boolean useTimestamp,
-                                         final boolean requireFullStackTrace) {
+    public static CallStack newCallStack(final String messageFormat, final boolean useTimestamp, final boolean requireFullStackTrace) {
+        // 不要求完整的堆栈信息的话，使用SecurityManagerCallStack就可以
         return canCreateSecurityManager() && !requireFullStackTrace ?
                 new SecurityManagerCallStack(messageFormat, useTimestamp) :
                 new ThrowableCallStack(messageFormat, useTimestamp);
     }
 
     /**
-     * Hidden constructor.
+     * Returns whether the caller can create a security manager in the current environment.
+     *
+     * @return {@code true} if it is able to create a security manager in the current environment, {@code false}
+     * otherwise.
      */
-    private CallStackUtils() {
+    private static boolean canCreateSecurityManager() {
+        final SecurityManager manager = System.getSecurityManager();
+        if (manager == null) {
+            return true;
+        }
+        try {
+            manager.checkPermission(new RuntimePermission("createSecurityManager"));
+            return true;
+        } catch (final AccessControlException ignored) {
+            return false;
+        }
     }
+
+
 }

@@ -19,8 +19,7 @@ package org.apache.commons.pool2.impl;
 import java.io.PrintWriter;
 
 /**
- * CallStack strategy using no-op implementations of all functionality. Can be used by default when abandoned object
- * logging is disabled.
+ * CallStack strategy using no-op implementations of all functionality. Can be used by default when abandoned object logging is disabled.
  *
  * @since 2.5
  */

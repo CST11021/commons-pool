@@ -35,9 +35,9 @@ public interface GenericObjectPoolMXBean {
     // Getters for basic configuration settings
 
     /**
-     * See {@link GenericObjectPool#getBlockWhenExhausted()}
+     * 当对象池耗尽时（即达到“活动”对象的最大数量），调用roweObject()方法是否阻塞
      *
-     * @return See {@link GenericObjectPool#getBlockWhenExhausted()}
+     * @return
      */
     boolean getBlockWhenExhausted();
 

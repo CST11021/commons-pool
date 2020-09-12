@@ -35,16 +35,27 @@ import java.util.Deque;
  */
 public class DefaultPooledObject<T> implements PooledObject<T> {
 
+    /** 原始的对象引用 */
     private final T object;
-    private PooledObjectState state = PooledObjectState.IDLE; // @GuardedBy("this") to ensure transitions are valid
+    /** 默认的对象初始化状态是空闲的 */
+    private PooledObjectState state = PooledObjectState.IDLE;
+    /** 对象的创建时间 */
     private final long createTime = System.currentTimeMillis();
+    /** 表示最后一次借出去的时间 */
     private volatile long lastBorrowTime = createTime;
+
     private volatile long lastUseTime = createTime;
+    /** 表示最后一次归还的时间 */
     private volatile long lastReturnTime = createTime;
+    /** 表示被借出去的次数 */
+    private volatile long borrowedCount = 0;
+    /**
+     * logAbandoned为true时，useUsageTracking也为true时，那么回收被遗弃的对象时，就会打印该对象最后一次的调用堆栈信息了,
+     * 如果useUsageTracking为true，即便是logAbandoned为false，那么每次对象的方法调用，一样还是会创建调用堆栈对象。只不过最终被回收时不会打印输出。
+     */
     private volatile boolean logAbandoned = false;
     private volatile CallStack borrowedBy = NoOpCallStack.INSTANCE;
     private volatile CallStack usedBy = NoOpCallStack.INSTANCE;
-    private volatile long borrowedCount = 0;
 
     /**
      * Creates a new instance that wraps the provided object so that the pool can
@@ -56,9 +67,23 @@ public class DefaultPooledObject<T> implements PooledObject<T> {
         this.object = object;
     }
 
+
+
+    // 获取池对象的信息
+
     @Override
     public T getObject() {
         return object;
+    }
+
+    /**
+     * Returns the state of this object.
+     *
+     * @return state
+     */
+    @Override
+    public synchronized PooledObjectState getState() {
+        return state;
     }
 
     @Override
@@ -130,32 +155,9 @@ public class DefaultPooledObject<T> implements PooledObject<T> {
         return lastUseTime;
     }
 
-    @Override
-    public int compareTo(final PooledObject<T> other) {
-        final long lastActiveDiff = this.getLastReturnTime() - other.getLastReturnTime();
-        if (lastActiveDiff == 0) {
-            // Make sure the natural ordering is broadly consistent with equals
-            // although this will break down if distinct objects have the same
-            // identity hash code.
-            // see java.lang.Comparable Javadocs
-            return System.identityHashCode(this) - System.identityHashCode(other);
-        }
-        // handle int overflow
-        return (int) Math.min(Math.max(lastActiveDiff, Integer.MIN_VALUE), Integer.MAX_VALUE);
-    }
 
-    @Override
-    public String toString() {
-        final StringBuilder result = new StringBuilder();
-        result.append("Object: ");
-        result.append(object.toString());
-        result.append(", State: ");
-        synchronized (this) {
-            result.append(state.toString());
-        }
-        return result.toString();
-        // TODO add other attributes
-    }
+
+    // 变更对象的生命周期
 
     @Override
     public synchronized boolean startEvictionTest() {
@@ -168,13 +170,13 @@ public class DefaultPooledObject<T> implements PooledObject<T> {
     }
 
     @Override
-    public synchronized boolean endEvictionTest(
-            final Deque<PooledObject<T>> idleQueue) {
+    public synchronized boolean endEvictionTest(final Deque<PooledObject<T>> idleQueue) {
         if (state == PooledObjectState.EVICTION) {
             state = PooledObjectState.IDLE;
             return true;
         } else if (state == PooledObjectState.EVICTION_RETURN_TO_HEAD) {
             state = PooledObjectState.IDLE;
+            // 将对象放在队列的最前面
             if (!idleQueue.offerFirst(this)) {
                 // TODO - Should never happen
             }
@@ -184,7 +186,7 @@ public class DefaultPooledObject<T> implements PooledObject<T> {
     }
 
     /**
-     * 只有对象是空闲状态的时候，才允许借出
+     * 当对象要被借出去前，会调用该方法，判断是否可以将该对象借出去，如果可以将对象标记为借出状态，并返回true（注意：只有对象是空闲状态的时候，才允许被标记）
      *
      * @return {@code true} if the original state was {@link PooledObjectState#IDLE IDLE}
      */
@@ -196,17 +198,17 @@ public class DefaultPooledObject<T> implements PooledObject<T> {
             lastBorrowTime = System.currentTimeMillis();
             lastUseTime = lastBorrowTime;
             borrowedCount++;
+            //
             if (logAbandoned) {
                 borrowedBy.fillInStackTrace();
             }
             return true;
         } else if (state == PooledObjectState.EVICTION) {
-            // TODO Allocate anyway and ignore eviction test
+            // TODO 无论如何分配，忽略驱逐测试
             state = PooledObjectState.EVICTION_RETURN_TO_HEAD;
             return false;
         }
-        // TODO if validating and testOnBorrow == true then pre-allocate for
-        // performance
+        // TODO if validating and testOnBorrow == true then pre-allocate for performance
         return false;
     }
 
@@ -243,25 +245,6 @@ public class DefaultPooledObject<T> implements PooledObject<T> {
         usedBy.fillInStackTrace();
     }
 
-    @Override
-    public void printStackTrace(final PrintWriter writer) {
-        boolean written = borrowedBy.printStackTrace(writer);
-        written |= usedBy.printStackTrace(writer);
-        if (written) {
-            writer.flush();
-        }
-    }
-
-    /**
-     * Returns the state of this object.
-     *
-     * @return state
-     */
-    @Override
-    public synchronized PooledObjectState getState() {
-        return state;
-    }
-
     /**
      * Marks the pooled object as abandoned.
      */
@@ -276,6 +259,19 @@ public class DefaultPooledObject<T> implements PooledObject<T> {
     @Override
     public synchronized void markReturning() {
         state = PooledObjectState.RETURNING;
+    }
+
+
+
+    // Abandoned和堆栈跟踪
+
+    @Override
+    public void printStackTrace(final PrintWriter writer) {
+        boolean written = borrowedBy.printStackTrace(writer);
+        written |= usedBy.printStackTrace(writer);
+        if (written) {
+            writer.flush();
+        }
     }
 
     @Override
@@ -302,4 +298,33 @@ public class DefaultPooledObject<T> implements PooledObject<T> {
                 false, requireFullStackTrace);
     }
 
+
+
+
+    @Override
+    public int compareTo(final PooledObject<T> other) {
+        final long lastActiveDiff = this.getLastReturnTime() - other.getLastReturnTime();
+        if (lastActiveDiff == 0) {
+            // Make sure the natural ordering is broadly consistent with equals
+            // although this will break down if distinct objects have the same
+            // identity hash code.
+            // see java.lang.Comparable Javadocs
+            return System.identityHashCode(this) - System.identityHashCode(other);
+        }
+        // handle int overflow
+        return (int) Math.min(Math.max(lastActiveDiff, Integer.MIN_VALUE), Integer.MAX_VALUE);
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder result = new StringBuilder();
+        result.append("Object: ");
+        result.append(object.toString());
+        result.append(", State: ");
+        synchronized (this) {
+            result.append(state.toString());
+        }
+        return result.toString();
+        // TODO add other attributes
+    }
 }

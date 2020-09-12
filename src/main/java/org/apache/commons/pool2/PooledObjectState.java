@@ -25,20 +25,13 @@ public enum PooledObjectState {
 
     /** 在池中，处于空闲状态 */
     IDLE,
-
     /** 已出借状态 */
     ALLOCATED,
-
-    /** 在队列中，当前正在测试可能的驱逐：驱逐定时器（EvictionTimer）会定时选定一批对象进行驱逐测试，对于符合驱逐条件的对象，将会被对象池无情的驱逐出空闲空间，并丢弃到invalid空间 */
+    /** 在队列中，当前正进行驱逐测试：驱逐定时器（EvictionTimer）会定时选定一批对象进行驱逐测试，对于符合驱逐条件的对象，将会被对象池无情的驱逐出空闲空间，并丢弃到invalid空间 */
     EVICTION,
 
     /**
-     * Not in the queue, currently being tested for possible eviction. An
-     * attempt to borrow the object was made while being tested which removed it
-     * from the queue. It should be returned to the head of the queue once
-     * eviction testing completes.
-     * TODO: Consider allocating object and ignoring the result of the eviction
-     * test.
+     * 如果对象刚好在做驱逐测试，而此时该对象又被选为要借出去对象，则此时会将对象状态设置为该状态，驱逐测试后，如果对象仍然可用，则保存在队列头部，后续可以优先被借出去
      */
     EVICTION_RETURN_TO_HEAD,
 

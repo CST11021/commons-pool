@@ -37,7 +37,6 @@ import java.util.List;
 public class SecurityManagerCallStack implements CallStack {
 
     private final String messageFormat;
-    //@GuardedBy("dateFormat")
     private final DateFormat dateFormat;
     private final PrivateSecurityManager securityManager;
 
@@ -61,6 +60,7 @@ public class SecurityManagerCallStack implements CallStack {
         if (snapshotRef == null) {
             return false;
         }
+
         final String message;
         if (dateFormat == null) {
             message = messageFormat;
@@ -69,6 +69,7 @@ public class SecurityManagerCallStack implements CallStack {
                 message = dateFormat.format(Long.valueOf(snapshotRef.timestamp));
             }
         }
+
         writer.println(message);
         for (final WeakReference<Class<?>> reference : snapshotRef.stack) {
             writer.println(reference.get());

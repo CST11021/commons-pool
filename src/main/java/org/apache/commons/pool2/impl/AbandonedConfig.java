@@ -17,21 +17,41 @@
 
 package org.apache.commons.pool2.impl;
 
+import org.apache.commons.pool2.ObjectPool;
 import org.apache.commons.pool2.TrackedUse;
 import org.apache.commons.pool2.UsageTracking;
 
 import java.io.PrintWriter;
 
 /**
- * Configuration settings for abandoned object removal.
+ * 用于删除废弃对象的配置设置
  *
  * @since 2.0
  */
 public class AbandonedConfig {
 
-    /** 是否移除被借出去的对象 */
+    /** 表示在调用{@link ObjectPool#borrowObject()}方法时，如果池子中空闲的对象较少，而被借出去的对象较多时，是否要移除那些被借出去很久都没有归还或者一直在池子里很久都没有再被借出去的对象 */
     private boolean removeAbandonedOnBorrow = false;
+    /** 该时间表示那些被借走的，但是超过了很长时间没有被归还的对象或者放在池子里很长时间没有被借出的对象，该配置配合{@link #removeAbandonedOnBorrow}使用 */
+    private int removeAbandonedTimeout = 300;
+    /** 表示是否对驱逐器测试通过后那些废弃进行删除 */
+    private boolean removeAbandonedOnMaintenance = false;
 
+    /** 表示每次对象的方法调用，是否要创建调用的堆栈对象 */
+    private boolean useUsageTracking = false;
+    /**
+     * logAbandoned为true时，useUsageTracking也为true时，那么回收被遗弃的对象时，就会打印该对象最后一次的调用堆栈信息了,
+     * 如果useUsageTracking为true，即便是logAbandoned为false，那么每次对象的方法调用，一样还是会创建调用堆栈对象。只不过最终被回收时不会打印输出。
+     */
+    private boolean logAbandoned = false;
+    /** 当logAbandoned为true时，该配置表示是否要记录完整的堆栈跟踪，如果是false，则可以使用更快的方法来记录仅包含类数据的堆栈跟踪。 */
+    private boolean requireFullStackTrace = true;
+    /** 这是一个日志输出器，用来定义调用堆栈日志的输出行为（输出到控制台、文件等）。默认输出到控制台。如果logAbandoned为false，就不会有输出行为。*/
+    private PrintWriter logWriter = new PrintWriter(System.out);
+
+
+
+    // getter and setter ...
 
     public boolean getRemoveAbandonedOnBorrow() {
         return this.removeAbandonedOnBorrow;
@@ -39,12 +59,6 @@ public class AbandonedConfig {
     public void setRemoveAbandonedOnBorrow(final boolean removeAbandonedOnBorrow) {
         this.removeAbandonedOnBorrow = removeAbandonedOnBorrow;
     }
-
-    /**
-     * Whether or not pool maintenance (evictor) performs abandoned object removal.
-     */
-    private boolean removeAbandonedOnMaintenance = false;
-
     /**
      * <p>Flag to remove abandoned objects if they exceed the
      * removeAbandonedTimeout when pool maintenance (the "evictor")
@@ -63,7 +77,6 @@ public class AbandonedConfig {
     public boolean getRemoveAbandonedOnMaintenance() {
         return this.removeAbandonedOnMaintenance;
     }
-
     /**
      * <p>Flag to remove abandoned objects if they exceed the
      * removeAbandonedTimeout when pool maintenance runs.</p>
@@ -75,12 +88,6 @@ public class AbandonedConfig {
     public void setRemoveAbandonedOnMaintenance(final boolean removeAbandonedOnMaintenance) {
         this.removeAbandonedOnMaintenance = removeAbandonedOnMaintenance;
     }
-
-    /**
-     * 可以删除废弃对象之前的秒数
-     */
-    private int removeAbandonedTimeout = 300;
-
     /**
      * <p>Timeout in seconds before an abandoned object can be removed.</p>
      *
@@ -95,7 +102,6 @@ public class AbandonedConfig {
     public int getRemoveAbandonedTimeout() {
         return this.removeAbandonedTimeout;
     }
-
     /**
      * <p>Sets the timeout in seconds before an abandoned object can be
      * removed</p>
@@ -111,13 +117,6 @@ public class AbandonedConfig {
     public void setRemoveAbandonedTimeout(final int removeAbandonedTimeout) {
         this.removeAbandonedTimeout = removeAbandonedTimeout;
     }
-
-    /**
-     * Determines whether or not to log stack traces for application code
-     * which abandoned an object.
-     */
-    private boolean logAbandoned = false;
-
     /**
      * Flag to log stack traces for application code which abandoned
      * an object.
@@ -132,7 +131,6 @@ public class AbandonedConfig {
     public boolean getLogAbandoned() {
         return this.logAbandoned;
     }
-
     /**
      * Sets the flag to log stack traces for application code which abandoned
      * an object.
@@ -143,15 +141,6 @@ public class AbandonedConfig {
     public void setLogAbandoned(final boolean logAbandoned) {
         this.logAbandoned = logAbandoned;
     }
-
-    /**
-     * 确定当logAbandoned为true时是否记录完整的堆栈跟踪。
-     * 如果禁用，则可以使用更快的方法来记录仅包含类数据的堆栈跟踪。
-     *
-     * @since 2.5
-     */
-    private boolean requireFullStackTrace = true;
-
     /**
      * Indicates if full stack traces are required when {@link #getLogAbandoned() logAbandoned}
      * is true. Defaults to true. Logging of abandoned objects requiring a full stack trace will
@@ -166,7 +155,6 @@ public class AbandonedConfig {
     public boolean getRequireFullStackTrace() {
         return requireFullStackTrace;
     }
-
     /**
      * Sets the flag to require full stack traces for logging abandoned connections when enabled.
      *
@@ -179,13 +167,6 @@ public class AbandonedConfig {
     public void setRequireFullStackTrace(final boolean requireFullStackTrace) {
         this.requireFullStackTrace = requireFullStackTrace;
     }
-
-    /**
-     * PrintWriter to use to log information on abandoned objects.
-     * Use of default system encoding is deliberate.
-     */
-    private PrintWriter logWriter = new PrintWriter(System.out);
-
     /**
      * Returns the log writer being used by this configuration to log
      * information on abandoned objects. If not set, a PrintWriter based on
@@ -196,7 +177,6 @@ public class AbandonedConfig {
     public PrintWriter getLogWriter() {
         return logWriter;
     }
-
     /**
      * Sets the log writer to be used by this configuration to log
      * information on abandoned objects.
@@ -206,14 +186,6 @@ public class AbandonedConfig {
     public void setLogWriter(final PrintWriter logWriter) {
         this.logWriter = logWriter;
     }
-
-    /**
-     * If the pool implements {@link UsageTracking}, should the pool record a
-     * stack trace every time a method is called on a pooled object and retain
-     * the most recent stack trace to aid debugging of abandoned objects?
-     */
-    private boolean useUsageTracking = false;
-
     /**
      * If the pool implements {@link UsageTracking}, should the pool record a
      * stack trace every time a method is called on a pooled object and retain
@@ -224,7 +196,6 @@ public class AbandonedConfig {
     public boolean getUseUsageTracking() {
         return useUsageTracking;
     }
-
     /**
      * If the pool implements {@link UsageTracking}, configure whether the pool
      * should record a stack trace every time a method is called on a pooled

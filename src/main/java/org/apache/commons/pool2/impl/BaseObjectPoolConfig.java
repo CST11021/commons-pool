@@ -115,13 +115,7 @@ public abstract class BaseObjectPoolConfig<T> extends BaseObject implements Clon
      * @see GenericKeyedObjectPool#getTestWhileIdle()
      */
     public static final boolean DEFAULT_TEST_WHILE_IDLE = false;
-    /**
-     * The default value for the {@code timeBetweenEvictionRunsMillis}
-     * configuration attribute.
-     *
-     * @see GenericObjectPool#getTimeBetweenEvictionRunsMillis()
-     * @see GenericKeyedObjectPool#getTimeBetweenEvictionRunsMillis()
-     */
+    /** 驱逐器执行的间隔时间，>0才运行 */
     public static final long DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS = -1L;
     /**
      * The default value for the {@code blockWhenExhausted} configuration

@@ -46,7 +46,7 @@ class EvictionTimer {
     /**
      * Executor instance
      */
-    private static ScheduledThreadPoolExecutor executor; //@GuardedBy("EvictionTimer.class")
+    private static ScheduledThreadPoolExecutor executor;
 
     /**
      * Prevents instantiation
@@ -54,7 +54,6 @@ class EvictionTimer {
     private EvictionTimer() {
         // Hide the default constructor
     }
-
 
     /**
      * @since 2.4.3
@@ -69,7 +68,7 @@ class EvictionTimer {
 
     /**
      * Adds the specified eviction task to the timer. Tasks that are added with a
-     * call to this method *must* call {@link #cancel()} to cancel the
+     * call to this method *must* call {@link #cancel(BaseGenericObjectPool.Evictor, long, TimeUnit)} to cancel the
      * task to prevent memory and/or thread leaks in application server
      * environments.
      *
@@ -77,8 +76,7 @@ class EvictionTimer {
      * @param delay  Delay in milliseconds before task is executed.
      * @param period Time in milliseconds between executions.
      */
-    static synchronized void schedule(
-            final BaseGenericObjectPool<?>.Evictor task, final long delay, final long period) {
+    static synchronized void schedule(final BaseGenericObjectPool<?>.Evictor task, final long delay, final long period) {
         if (null == executor) {
             executor = new ScheduledThreadPoolExecutor(1, new EvictorThreadFactory());
             executor.setRemoveOnCancelPolicy(true);
@@ -97,8 +95,7 @@ class EvictionTimer {
      *                terminate?
      * @param unit    The units for the specified timeout.
      */
-    static synchronized void cancel(
-            final BaseGenericObjectPool<?>.Evictor evictor, final long timeout, final TimeUnit unit) {
+    static synchronized void cancel(final BaseGenericObjectPool<?>.Evictor evictor, final long timeout, final TimeUnit unit) {
         if (evictor != null) {
             evictor.cancel();
         }

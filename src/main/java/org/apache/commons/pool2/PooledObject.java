@@ -16,6 +16,9 @@
  */
 package org.apache.commons.pool2;
 
+import org.apache.commons.pool2.impl.SecurityManagerCallStack;
+import org.apache.commons.pool2.impl.ThrowableCallStack;
+
 import java.io.PrintWriter;
 import java.util.Deque;
 
@@ -27,6 +30,8 @@ import java.util.Deque;
  */
 public interface PooledObject<T> extends Comparable<PooledObject<T>> {
 
+    // 获取池对象的信息
+
     /**
      * 返回被包装的原始对象
      *
@@ -35,11 +40,25 @@ public interface PooledObject<T> extends Comparable<PooledObject<T>> {
     T getObject();
 
     /**
+     * 获取该对象的当前状态
+     *
+     * @return state
+     */
+    PooledObjectState getState();
+
+    /**
      * 该原始对象的创建时间
      *
      * @return
      */
     long getCreateTime();
+
+    /**
+     * 返回该对象上次被借用的时间
+     *
+     * @return
+     */
+    long getLastBorrowTime();
 
     /**
      * 获取上一次借出去到现在的间隔时间（以毫秒为单位）
@@ -66,13 +85,6 @@ public interface PooledObject<T> extends Comparable<PooledObject<T>> {
     long getIdleTimeMillis();
 
     /**
-     * 返回该对象上次被借用的时间
-     *
-     * @return
-     */
-    long getLastBorrowTime();
-
-    /**
      * 获取该对象上次归还的时间
      *
      * @return The time the object was last returned
@@ -86,15 +98,20 @@ public interface PooledObject<T> extends Comparable<PooledObject<T>> {
      */
     long getLastUsedTime();
 
+
+
+    // 变更对象的生命周期
+
+
     /**
-     * 尝试将池对象置于{@link PooledObjectState#EVICTION}状态
+     * 尝试将池对象置于{@link PooledObjectState#EVICTION}状态，表示当前正在做驱逐测试
      *
      * @return 设置成功时返回true
      */
     boolean startEvictionTest();
 
     /**
-     * Called to inform the object that the eviction test has ended.
+     * 通知对象驱逐测试已结束
      *
      * @param idleQueue The queue of idle objects to which the object should be returned
      * @return Currently not used
@@ -102,7 +119,7 @@ public interface PooledObject<T> extends Comparable<PooledObject<T>> {
     boolean endEvictionTest(Deque<PooledObject<T>> idleQueue);
 
     /**
-     * 分配对象
+     * 当对象要被借出去前，会调用该方法，判断是否可以将该对象借出去，如果可以将对象标记为借出状态，并返回true（注意：只有对象是空闲状态的时候，才允许被标记）
      *
      * @return {@code true} if the original state was {@link PooledObjectState#IDLE IDLE}
      */
@@ -121,6 +138,24 @@ public interface PooledObject<T> extends Comparable<PooledObject<T>> {
     void invalidate();
 
     /**
+     * 将该对象标记为已放弃
+     */
+    void markAbandoned();
+
+    /**
+     * 将对象标记为归还状态
+     */
+    void markReturning();
+
+    /**
+     * 记录最后一次使用该对象的时间，便于堆栈跟踪
+     */
+    void use();
+
+
+    // Abandoned和堆栈跟踪
+
+    /**
      * 设置是否记录对象使用的堆栈信息，可用于池泄漏时问题追溯
      *
      * @param logAbandoned The new configuration setting for abandonedobject tracking
@@ -128,9 +163,7 @@ public interface PooledObject<T> extends Comparable<PooledObject<T>> {
     void setLogAbandoned(boolean logAbandoned);
 
     /**
-     * Configures the stack trace generation strategy based on whether or not fully detailed stack traces are required.
-     * When set to false, abandoned logs may only include caller class information rather than method names, line
-     * numbers, and other normal metadata available in a full stack trace.
+     * 堆栈的跟踪日志是否需要打印完整的方法调用，如果需要则使用{@link ThrowableCallStack}，否则{@link SecurityManagerCallStack}
      *
      * @param requireFullStackTrace the new configuration setting for abandoned object logging
      * @since 2.7.0
@@ -140,35 +173,15 @@ public interface PooledObject<T> extends Comparable<PooledObject<T>> {
     }
 
     /**
-     * Record the current stack trace as the last time the object was used.
-     */
-    void use();
-
-    /**
-     * Prints the stack trace of the code that borrowed this pooled object and
-     * the stack trace of the last code to use this object (if available) to
-     * the supplied writer.
+     * 输出对象的调用堆栈
      *
      * @param writer The destination for the debug output
      */
     void printStackTrace(PrintWriter writer);
 
-    /**
-     * Returns the state of this object.
-     *
-     * @return state
-     */
-    PooledObjectState getState();
 
-    /**
-     * 将该对象标记为已放弃
-     */
-    void markAbandoned();
 
-    /**
-     * 将对象标记为归还状态
-     */
-    void markReturning();
+
 
 
 

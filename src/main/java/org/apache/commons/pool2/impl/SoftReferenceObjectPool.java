@@ -29,10 +29,7 @@ import org.apache.commons.pool2.PoolUtils;
 import org.apache.commons.pool2.PooledObjectFactory;
 
 /**
- * A {@link java.lang.ref.SoftReference SoftReference} based {@link ObjectPool}.
- * <p>
- * This class is intended to be thread-safe.
- * </p>
+ * 一个基于 ObjectPool 的实现软引用的对象池，此类旨在实现线程安全。
  *
  * @param <T> Type of element pooled in this pool.
  * @since 2.0
@@ -54,30 +51,27 @@ public class SoftReferenceObjectPool<T> extends BaseObjectPool<T> {
     /**
      * Count of instances that have been checkout out to pool clients
      */
-    private int numActive = 0; // @GuardedBy("this")
+    private int numActive = 0;
 
     /**
      * Total number of instances that have been destroyed
      */
-    private long destroyCount = 0; // @GuardedBy("this")
-
+    private long destroyCount = 0;
 
     /**
      * Total number of instances that have been created
      */
-    private long createCount = 0; // @GuardedBy("this")
+    private long createCount = 0;
 
     /**
      * Idle references - waiting to be borrowed
      */
-    private final LinkedBlockingDeque<PooledSoftReference<T>> idleReferences =
-            new LinkedBlockingDeque<>();
+    private final LinkedBlockingDeque<PooledSoftReference<T>> idleReferences = new LinkedBlockingDeque<>();
 
     /**
      * All references - checked out or waiting to be borrowed.
      */
-    private final ArrayList<PooledSoftReference<T>> allReferences =
-            new ArrayList<>();
+    private final ArrayList<PooledSoftReference<T>> allReferences = new ArrayList<>();
 
     /**
      * Create a <code>SoftReferenceObjectPool</code> with the specified factory.

@@ -44,33 +44,33 @@ import org.apache.commons.pool2.PooledObjectState;
 import org.apache.commons.pool2.SwallowedExceptionListener;
 
 /**
- * Base class that provides common functionality for {@link GenericObjectPool}
- * and {@link GenericKeyedObjectPool}. The primary reason this class exists is
- * reduce code duplication between the two pool implementations.
+ * 为{@link GenericObjectPool}和{@link GenericKeyedObjectPool}提供通用功能的基类.
+ * 此类存在的主要原因是减少两个池实现之间的代码重复。
  *
- * @param <T> Type of element pooled in this pool.
- *            <p>
- *            This class is intended to be thread-safe.
+ * @param <T> Type of element pooled in this pool. This class is intended to be thread-safe.
  * @since 2.0
  */
 public abstract class BaseGenericObjectPool<T> extends BaseObject {
 
     // Constants
-    /**
-     * 用于存储某些属性的历史数据的缓存的大小，以便可以计算滚动方式
-     */
+
+    /** 用于存储某些属性的历史数据的缓存的大小，以便可以计算滚动方式 */
     public static final int MEAN_TIMING_STATS_CACHE_SIZE = 100;
 
     private static final String EVICTION_POLICY_TYPE_NAME = EvictionPolicy.class.getName();
 
-    // Configuration attributes
+    /** 表示池子中的最大数量限制 */
     private volatile int maxTotal = GenericKeyedObjectPoolConfig.DEFAULT_MAX_TOTAL;
     /** 当对象池耗尽时（即达到“活动”对象的最大数量），调用roweObject()方法是否阻塞 */
     private volatile boolean blockWhenExhausted = BaseObjectPoolConfig.DEFAULT_BLOCK_WHEN_EXHAUSTED;
     /** 向对象池借用对象的最大等待时间 */
     private volatile long maxWaitMillis = BaseObjectPoolConfig.DEFAULT_MAX_WAIT_MILLIS;
+    /** 默认为true，即当池中有空闲可用的对象时，调用borrowObject方法会返回最近（后进）的实例, GenericObjectPool 提供了后进先出(LIFO)与先进先出(FIFO)两种行为模式的池。 */
     private volatile boolean lifo = BaseObjectPoolConfig.DEFAULT_LIFO;
+    /** 当从池中获取资源或者将资源还回池中时 是否使用java.util.concurrent.locks.ReentrantLock.ReentrantLock 的公平锁机制,默认为false */
     private final boolean fairness;
+
+
     /** 表示向对象池添加对象前，是否需要进行检查，如果检查不通过，则不会将对象添加到池子里 */
     private volatile boolean testOnCreate = BaseObjectPoolConfig.DEFAULT_TEST_ON_CREATE;
     /** 表示从对象池借出对象前，是否需要进行检查，如果检查不通过，则不会将对象借出去 */
@@ -79,10 +79,19 @@ public abstract class BaseGenericObjectPool<T> extends BaseObject {
     private volatile boolean testOnReturn = BaseObjectPoolConfig.DEFAULT_TEST_ON_RETURN;
     /** 表示是否要对池子里的空闲对象进行校验 */
     private volatile boolean testWhileIdle = BaseObjectPoolConfig.DEFAULT_TEST_WHILE_IDLE;
+
+
+    // 驱逐相关配置参数
+
+    /** 驱逐器执行的间隔时间，>0才运行  */
     private volatile long timeBetweenEvictionRunsMillis = BaseObjectPoolConfig.DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS;
+    /** 驱逐器每次对池子中空闲对象做驱逐测试的个数 */
     private volatile int numTestsPerEvictionRun = BaseObjectPoolConfig.DEFAULT_NUM_TESTS_PER_EVICTION_RUN;
+    /** 池对象保持空闲状态的时长，超过了该值，会被进行驱逐测试 */
     private volatile long minEvictableIdleTimeMillis = BaseObjectPoolConfig.DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS;
+    /** 软标准情况下，池对象保持空闲状态的时长，超过了该值，判断是否驱逐，软标准，自己设值一般比idleEvictTime小，结合minIdle使用 */
     private volatile long softMinEvictableIdleTimeMillis = BaseObjectPoolConfig.DEFAULT_SOFT_MIN_EVICTABLE_IDLE_TIME_MILLIS;
+    /** 用于进行驱逐测试的策略接口 */
     private volatile EvictionPolicy<T> evictionPolicy;
     private volatile long evictorShutdownTimeoutMillis = BaseObjectPoolConfig.DEFAULT_EVICTOR_SHUTDOWN_TIMEOUT_MILLIS;
 
@@ -90,10 +99,12 @@ public abstract class BaseGenericObjectPool<T> extends BaseObject {
     // Internal (primarily state) attributes
     final Object closeLock = new Object();
     volatile boolean closed = false;
+    /** 启动驱逐器的锁 */
     final Object evictionLock = new Object();
-    private Evictor evictor = null; // @GuardedBy("evictionLock")
-    EvictionIterator evictionIterator = null; // @GuardedBy("evictionLock")
-    /*
+    private Evictor evictor = null;
+    /** 驱逐器做驱逐测试时，用于迭代空闲对象的迭代器 */
+    EvictionIterator evictionIterator = null;
+    /**
      * Class loader for evictor thread to use since, in a JavaEE or similar
      * environment, the context class loader for the evictor thread may not have
      * visibility of the correct factory. See POOL-161. Uses a weak reference to
@@ -148,60 +159,6 @@ public abstract class BaseGenericObjectPool<T> extends BaseObject {
         fairness = config.getFairness();
     }
 
-
-    /**
-     * Returns the maximum number of objects that can be allocated by the pool
-     * (checked out to clients, or idle awaiting checkout) at a given time. When
-     * negative, there is no limit to the number of objects that can be
-     * managed by the pool at one time.
-     *
-     * @return the cap on the total number of object instances managed by the
-     * pool.
-     * @see #setMaxTotal
-     */
-    public final int getMaxTotal() {
-        return maxTotal;
-    }
-
-    /**
-     * Sets the cap on the number of objects that can be allocated by the pool
-     * (checked out to clients, or idle awaiting checkout) at a given time. Use
-     * a negative value for no limit.
-     *
-     * @param maxTotal The cap on the total number of object instances managed
-     *                 by the pool. Negative values mean that there is no limit
-     *                 to the number of objects allocated by the pool.
-     * @see #getMaxTotal
-     */
-    public final void setMaxTotal(final int maxTotal) {
-        this.maxTotal = maxTotal;
-    }
-
-    /**
-     * 当对象池耗尽时（即达到“活动”对象的最大数量），调用roweObject()方法是否阻塞
-     *
-     * @return <code>true</code> if <code>borrowObject()</code> should block
-     * when the pool is exhausted
-     * @see #setBlockWhenExhausted
-     */
-    public final boolean getBlockWhenExhausted() {
-        return blockWhenExhausted;
-    }
-
-    /**
-     * Sets whether to block when the <code>borrowObject()</code> method is
-     * invoked when the pool is exhausted (the maximum number of "active"
-     * objects has been reached).
-     *
-     * @param blockWhenExhausted <code>true</code> if
-     *                           <code>borrowObject()</code> should block
-     *                           when the pool is exhausted
-     * @see #getBlockWhenExhausted
-     */
-    public final void setBlockWhenExhausted(final boolean blockWhenExhausted) {
-        this.blockWhenExhausted = blockWhenExhausted;
-    }
-
     /**
      * Initializes the receiver with the given configuration.
      *
@@ -230,483 +187,6 @@ public abstract class BaseGenericObjectPool<T> extends BaseObject {
         setEvictorShutdownTimeoutMillis(config.getEvictorShutdownTimeoutMillis());
     }
 
-    /**
-     * Returns the maximum amount of time (in milliseconds) the
-     * <code>borrowObject()</code> method should block before throwing an
-     * exception when the pool is exhausted and
-     * {@link #getBlockWhenExhausted} is true. When less than 0, the
-     * <code>borrowObject()</code> method may block indefinitely.
-     *
-     * @return the maximum number of milliseconds <code>borrowObject()</code>
-     * will block.
-     * @see #setMaxWaitMillis
-     * @see #setBlockWhenExhausted
-     */
-    public final long getMaxWaitMillis() {
-        return maxWaitMillis;
-    }
-
-    /**
-     * Sets the maximum amount of time (in milliseconds) the
-     * <code>borrowObject()</code> method should block before throwing an
-     * exception when the pool is exhausted and
-     * {@link #getBlockWhenExhausted} is true. When less than 0, the
-     * <code>borrowObject()</code> method may block indefinitely.
-     *
-     * @param maxWaitMillis the maximum number of milliseconds
-     *                      <code>borrowObject()</code> will block or negative
-     *                      for indefinitely.
-     * @see #getMaxWaitMillis
-     * @see #setBlockWhenExhausted
-     */
-    public final void setMaxWaitMillis(final long maxWaitMillis) {
-        this.maxWaitMillis = maxWaitMillis;
-    }
-
-    /**
-     * Returns whether the pool has LIFO (last in, first out) behaviour with
-     * respect to idle objects - always returning the most recently used object
-     * from the pool, or as a FIFO (first in, first out) queue, where the pool
-     * always returns the oldest object in the idle object pool.
-     *
-     * @return <code>true</code> if the pool is configured with LIFO behaviour
-     * or <code>false</code> if the pool is configured with FIFO
-     * behaviour
-     * @see #setLifo
-     */
-    public final boolean getLifo() {
-        return lifo;
-    }
-
-    /**
-     * Returns whether or not the pool serves threads waiting to borrow objects fairly.
-     * True means that waiting threads are served as if waiting in a FIFO queue.
-     *
-     * @return <code>true</code> if waiting threads are to be served
-     * by the pool in arrival order
-     */
-    public final boolean getFairness() {
-        return fairness;
-    }
-
-    /**
-     * Sets whether the pool has LIFO (last in, first out) behaviour with
-     * respect to idle objects - always returning the most recently used object
-     * from the pool, or as a FIFO (first in, first out) queue, where the pool
-     * always returns the oldest object in the idle object pool.
-     *
-     * @param lifo <code>true</code> if the pool is to be configured with LIFO
-     *             behaviour or <code>false</code> if the pool is to be
-     *             configured with FIFO behaviour
-     * @see #getLifo()
-     */
-    public final void setLifo(final boolean lifo) {
-        this.lifo = lifo;
-    }
-
-    /**
-     * Returns whether objects created for the pool will be validated before
-     * being returned from the <code>borrowObject()</code> method. Validation is
-     * performed by the <code>validateObject()</code> method of the factory
-     * associated with the pool. If the object fails to validate, then
-     * <code>borrowObject()</code> will fail.
-     *
-     * @return <code>true</code> if newly created objects are validated before
-     * being returned from the <code>borrowObject()</code> method
-     * @see #setTestOnCreate
-     * @since 2.2
-     */
-    public final boolean getTestOnCreate() {
-        return testOnCreate;
-    }
-
-    /**
-     * Sets whether objects created for the pool will be validated before
-     * being returned from the <code>borrowObject()</code> method. Validation is
-     * performed by the <code>validateObject()</code> method of the factory
-     * associated with the pool. If the object fails to validate, then
-     * <code>borrowObject()</code> will fail.
-     *
-     * @param testOnCreate <code>true</code> if newly created objects should be
-     *                     validated before being returned from the
-     *                     <code>borrowObject()</code> method
-     * @see #getTestOnCreate
-     * @since 2.2
-     */
-    public final void setTestOnCreate(final boolean testOnCreate) {
-        this.testOnCreate = testOnCreate;
-    }
-
-    /**
-     * Returns whether objects borrowed from the pool will be validated before
-     * being returned from the <code>borrowObject()</code> method. Validation is
-     * performed by the <code>validateObject()</code> method of the factory
-     * associated with the pool. If the object fails to validate, it will be
-     * removed from the pool and destroyed, and a new attempt will be made to
-     * borrow an object from the pool.
-     *
-     * @return <code>true</code> if objects are validated before being returned
-     * from the <code>borrowObject()</code> method
-     * @see #setTestOnBorrow
-     */
-    public final boolean getTestOnBorrow() {
-        return testOnBorrow;
-    }
-
-    /**
-     * Sets whether objects borrowed from the pool will be validated before
-     * being returned from the <code>borrowObject()</code> method. Validation is
-     * performed by the <code>validateObject()</code> method of the factory
-     * associated with the pool. If the object fails to validate, it will be
-     * removed from the pool and destroyed, and a new attempt will be made to
-     * borrow an object from the pool.
-     *
-     * @param testOnBorrow <code>true</code> if objects should be validated
-     *                     before being returned from the
-     *                     <code>borrowObject()</code> method
-     * @see #getTestOnBorrow
-     */
-    public final void setTestOnBorrow(final boolean testOnBorrow) {
-        this.testOnBorrow = testOnBorrow;
-    }
-
-    /**
-     * 是否在对象归还前进行检查测试，检查通过才能放回池子里
-     *
-     * @return <code>true</code> if objects are validated on return to
-     * the pool via the <code>returnObject()</code> method
-     * @see #setTestOnReturn
-     */
-    public final boolean getTestOnReturn() {
-        return testOnReturn;
-    }
-
-    /**
-     * Sets whether objects borrowed from the pool will be validated when
-     * they are returned to the pool via the <code>returnObject()</code> method.
-     * Validation is performed by the <code>validateObject()</code> method of
-     * the factory associated with the pool. Returning objects that fail validation
-     * are destroyed rather then being returned the pool.
-     *
-     * @param testOnReturn <code>true</code> if objects are validated on
-     *                     return to the pool via the
-     *                     <code>returnObject()</code> method
-     * @see #getTestOnReturn
-     */
-    public final void setTestOnReturn(final boolean testOnReturn) {
-        this.testOnReturn = testOnReturn;
-    }
-
-    /**
-     * Returns whether objects sitting idle in the pool will be validated by the
-     * idle object evictor (if any - see
-     * {@link #setTimeBetweenEvictionRunsMillis(long)}). Validation is performed
-     * by the <code>validateObject()</code> method of the factory associated
-     * with the pool. If the object fails to validate, it will be removed from
-     * the pool and destroyed.
-     *
-     * @return <code>true</code> if objects will be validated by the evictor
-     * @see #setTestWhileIdle
-     * @see #setTimeBetweenEvictionRunsMillis
-     */
-    public final boolean getTestWhileIdle() {
-        return testWhileIdle;
-    }
-
-    /**
-     * Returns whether objects sitting idle in the pool will be validated by the
-     * idle object evictor (if any - see
-     * {@link #setTimeBetweenEvictionRunsMillis(long)}). Validation is performed
-     * by the <code>validateObject()</code> method of the factory associated
-     * with the pool. If the object fails to validate, it will be removed from
-     * the pool and destroyed.  Note that setting this property has no effect
-     * unless the idle object evictor is enabled by setting
-     * <code>timeBetweenEvictionRunsMillis</code> to a positive value.
-     *
-     * @param testWhileIdle <code>true</code> so objects will be validated by the evictor
-     * @see #getTestWhileIdle
-     * @see #setTimeBetweenEvictionRunsMillis
-     */
-    public final void setTestWhileIdle(final boolean testWhileIdle) {
-        this.testWhileIdle = testWhileIdle;
-    }
-
-    /**
-     * Returns the number of milliseconds to sleep between runs of the idle
-     * object evictor thread. When non-positive, no idle object evictor thread
-     * will be run.
-     *
-     * @return number of milliseconds to sleep between evictor runs
-     * @see #setTimeBetweenEvictionRunsMillis
-     */
-    public final long getTimeBetweenEvictionRunsMillis() {
-        return timeBetweenEvictionRunsMillis;
-    }
-
-    /**
-     * Sets the number of milliseconds to sleep between runs of the idle object evictor thread.
-     * <ul>
-     * <li>When positive, the idle object evictor thread starts.</li>
-     * <li>When non-positive, no idle object evictor thread runs.</li>
-     * </ul>
-     *
-     * @param timeBetweenEvictionRunsMillis number of milliseconds to sleep between evictor runs
-     * @see #getTimeBetweenEvictionRunsMillis
-     */
-    public final void setTimeBetweenEvictionRunsMillis(final long timeBetweenEvictionRunsMillis) {
-        this.timeBetweenEvictionRunsMillis = timeBetweenEvictionRunsMillis;
-        startEvictor(timeBetweenEvictionRunsMillis);
-    }
-
-    /**
-     * Returns the maximum number of objects to examine during each run (if any)
-     * of the idle object evictor thread. When positive, the number of tests
-     * performed for a run will be the minimum of the configured value and the
-     * number of idle instances in the pool. When negative, the number of tests
-     * performed will be <code>ceil({@link #getNumIdle}/
-     * abs({@link #getNumTestsPerEvictionRun}))</code> which means that when the
-     * value is <code>-n</code> roughly one nth of the idle objects will be
-     * tested per run.
-     *
-     * @return max number of objects to examine during each evictor run
-     * @see #setNumTestsPerEvictionRun
-     * @see #setTimeBetweenEvictionRunsMillis
-     */
-    public final int getNumTestsPerEvictionRun() {
-        return numTestsPerEvictionRun;
-    }
-
-    /**
-     * Sets the maximum number of objects to examine during each run (if any)
-     * of the idle object evictor thread. When positive, the number of tests
-     * performed for a run will be the minimum of the configured value and the
-     * number of idle instances in the pool. When negative, the number of tests
-     * performed will be <code>ceil({@link #getNumIdle}/
-     * abs({@link #getNumTestsPerEvictionRun}))</code> which means that when the
-     * value is <code>-n</code> roughly one nth of the idle objects will be
-     * tested per run.
-     *
-     * @param numTestsPerEvictionRun max number of objects to examine during each evictor run
-     * @see #getNumTestsPerEvictionRun
-     * @see #setTimeBetweenEvictionRunsMillis
-     */
-    public final void setNumTestsPerEvictionRun(final int numTestsPerEvictionRun) {
-        this.numTestsPerEvictionRun = numTestsPerEvictionRun;
-    }
-
-    /**
-     * Returns the minimum amount of time an object may sit idle in the pool
-     * before it is eligible for eviction by the idle object evictor (if any -
-     * see {@link #setTimeBetweenEvictionRunsMillis(long)}). When non-positive,
-     * no objects will be evicted from the pool due to idle time alone.
-     *
-     * @return minimum amount of time an object may sit idle in the pool before
-     * it is eligible for eviction
-     * @see #setMinEvictableIdleTimeMillis
-     * @see #setTimeBetweenEvictionRunsMillis
-     */
-    public final long getMinEvictableIdleTimeMillis() {
-        return minEvictableIdleTimeMillis;
-    }
-
-    /**
-     * Sets the minimum amount of time an object may sit idle in the pool
-     * before it is eligible for eviction by the idle object evictor (if any -
-     * see {@link #setTimeBetweenEvictionRunsMillis(long)}). When non-positive,
-     * no objects will be evicted from the pool due to idle time alone.
-     *
-     * @param minEvictableIdleTimeMillis minimum amount of time an object may sit idle in the pool
-     *                                   before it is eligible for eviction
-     * @see #getMinEvictableIdleTimeMillis
-     * @see #setTimeBetweenEvictionRunsMillis
-     */
-    public final void setMinEvictableIdleTimeMillis(
-            final long minEvictableIdleTimeMillis) {
-        this.minEvictableIdleTimeMillis = minEvictableIdleTimeMillis;
-    }
-
-    /**
-     * Returns the minimum amount of time an object may sit idle in the pool
-     * before it is eligible for eviction by the idle object evictor (if any -
-     * see {@link #setTimeBetweenEvictionRunsMillis(long)}),
-     * with the extra condition that at least <code>minIdle</code> object
-     * instances remain in the pool. This setting is overridden by
-     * {@link #getMinEvictableIdleTimeMillis} (that is, if
-     * {@link #getMinEvictableIdleTimeMillis} is positive, then
-     * {@link #getSoftMinEvictableIdleTimeMillis} is ignored).
-     *
-     * @return minimum amount of time an object may sit idle in the pool before
-     * it is eligible for eviction if minIdle instances are available
-     * @see #setSoftMinEvictableIdleTimeMillis
-     */
-    public final long getSoftMinEvictableIdleTimeMillis() {
-        return softMinEvictableIdleTimeMillis;
-    }
-
-    /**
-     * Sets the minimum amount of time an object may sit idle in the pool
-     * before it is eligible for eviction by the idle object evictor (if any -
-     * see {@link #setTimeBetweenEvictionRunsMillis(long)}),
-     * with the extra condition that at least <code>minIdle</code> object
-     * instances remain in the pool. This setting is overridden by
-     * {@link #getMinEvictableIdleTimeMillis} (that is, if
-     * {@link #getMinEvictableIdleTimeMillis} is positive, then
-     * {@link #getSoftMinEvictableIdleTimeMillis} is ignored).
-     *
-     * @param softMinEvictableIdleTimeMillis minimum amount of time an object may sit idle in the pool
-     *                                       before it is eligible for eviction if minIdle instances are
-     *                                       available
-     * @see #getSoftMinEvictableIdleTimeMillis
-     */
-    public final void setSoftMinEvictableIdleTimeMillis(
-            final long softMinEvictableIdleTimeMillis) {
-        this.softMinEvictableIdleTimeMillis = softMinEvictableIdleTimeMillis;
-    }
-
-    /**
-     * Returns the name of the {@link EvictionPolicy} implementation that is
-     * used by this pool.
-     *
-     * @return The fully qualified class name of the {@link EvictionPolicy}
-     * @see #setEvictionPolicyClassName(String)
-     */
-    public final String getEvictionPolicyClassName() {
-        return evictionPolicy.getClass().getName();
-    }
-
-    /**
-     * Sets the eviction policy for this pool.
-     *
-     * @param evictionPolicy the eviction policy for this pool.
-     * @since 2.6.0
-     */
-    public void setEvictionPolicy(final EvictionPolicy<T> evictionPolicy) {
-        this.evictionPolicy = evictionPolicy;
-    }
-
-    /**
-     * Sets the name of the {@link EvictionPolicy} implementation that is used by this pool. The Pool will attempt to
-     * load the class using the given class loader. If that fails, use the class loader for the {@link EvictionPolicy}
-     * interface.
-     *
-     * @param evictionPolicyClassName the fully qualified class name of the new eviction policy
-     * @param classLoader             the class loader to load the given {@code evictionPolicyClassName}.
-     * @see #getEvictionPolicyClassName()
-     * @since 2.6.0 If loading the class using the given class loader fails, use the class loader for the
-     * {@link EvictionPolicy} interface.
-     */
-    public final void setEvictionPolicyClassName(final String evictionPolicyClassName, final ClassLoader classLoader) {
-        // Getting epClass here and now best matches the caller's environment
-        final Class<?> epClass = EvictionPolicy.class;
-        final ClassLoader epClassLoader = epClass.getClassLoader();
-        try {
-            try {
-                setEvictionPolicy(evictionPolicyClassName, classLoader);
-            } catch (final ClassCastException | ClassNotFoundException e) {
-                setEvictionPolicy(evictionPolicyClassName, epClassLoader);
-            }
-        } catch (final ClassCastException e) {
-            throw new IllegalArgumentException("Class " + evictionPolicyClassName + " from class loaders [" +
-                    classLoader + ", " + epClassLoader + "] do not implement " + EVICTION_POLICY_TYPE_NAME);
-        } catch (final ClassNotFoundException | InstantiationException | IllegalAccessException |
-                InvocationTargetException | NoSuchMethodException e) {
-            final String exMessage = "Unable to create " + EVICTION_POLICY_TYPE_NAME + " instance of type " +
-                    evictionPolicyClassName;
-            throw new IllegalArgumentException(exMessage, e);
-        }
-    }
-
-    /**
-     * Sets the eviction policy.
-     *
-     * @param className   Eviction policy class name.
-     * @param classLoader Load the class from this class loader.
-     */
-    @SuppressWarnings("unchecked")
-    private void setEvictionPolicy(final String className, final ClassLoader classLoader)
-            throws ClassNotFoundException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-        final Class<?> clazz = Class.forName(className, true, classLoader);
-        final Object policy = clazz.getConstructor().newInstance();
-        this.evictionPolicy = (EvictionPolicy<T>) policy;
-    }
-
-    /**
-     * Sets the name of the {@link EvictionPolicy} implementation that is used by this pool. The Pool will attempt to
-     * load the class using the thread context class loader. If that fails, the use the class loader for the
-     * {@link EvictionPolicy} interface.
-     *
-     * @param evictionPolicyClassName the fully qualified class name of the new eviction policy
-     * @see #getEvictionPolicyClassName()
-     * @since 2.6.0 If loading the class using the thread context class loader fails, use the class loader for the
-     * {@link EvictionPolicy} interface.
-     */
-    public final void setEvictionPolicyClassName(final String evictionPolicyClassName) {
-        setEvictionPolicyClassName(evictionPolicyClassName, Thread.currentThread().getContextClassLoader());
-    }
-
-    /**
-     * Gets the timeout that will be used when waiting for the Evictor to
-     * shutdown if this pool is closed and it is the only pool still using the
-     * the value for the Evictor.
-     *
-     * @return The timeout in milliseconds that will be used while waiting for
-     * the Evictor to shut down.
-     */
-    public final long getEvictorShutdownTimeoutMillis() {
-        return evictorShutdownTimeoutMillis;
-    }
-
-    /**
-     * Sets the timeout that will be used when waiting for the Evictor to
-     * shutdown if this pool is closed and it is the only pool still using the
-     * the value for the Evictor.
-     *
-     * @param evictorShutdownTimeoutMillis the timeout in milliseconds that
-     *                                     will be used while waiting for the
-     *                                     Evictor to shut down.
-     */
-    public final void setEvictorShutdownTimeoutMillis(
-            final long evictorShutdownTimeoutMillis) {
-        this.evictorShutdownTimeoutMillis = evictorShutdownTimeoutMillis;
-    }
-
-    /**
-     * Closes the pool, destroys the remaining idle objects and, if registered
-     * in JMX, deregisters it.
-     */
-    public abstract void close();
-
-    /**
-     * Has this pool instance been closed.
-     *
-     * @return <code>true</code> when this pool has been closed.
-     */
-    public final boolean isClosed() {
-        return closed;
-    }
-
-    /**
-     * <p>Perform <code>numTests</code> idle object eviction tests, evicting
-     * examined objects that meet the criteria for eviction. If
-     * <code>testWhileIdle</code> is true, examined objects are validated
-     * when visited (and removed if invalid); otherwise only objects that
-     * have been idle for more than <code>minEvicableIdleTimeMillis</code>
-     * are removed.</p>
-     *
-     * @throws Exception when there is a problem evicting idle objects.
-     */
-    public abstract void evict() throws Exception;
-
-    /**
-     * Returns the {@link EvictionPolicy} defined for this pool.
-     *
-     * @return the eviction policy
-     * @since 2.4
-     * @since 2.6.0 Changed access from protected to public.
-     */
-    public EvictionPolicy<T> getEvictionPolicy() {
-        return evictionPolicy;
-    }
 
     /**
      * Verifies that the pool is open.
@@ -720,12 +200,7 @@ public abstract class BaseGenericObjectPool<T> extends BaseObject {
     }
 
     /**
-     * <p>Starts the evictor with the given delay. If there is an evictor
-     * running when this method is called, it is stopped and replaced with a
-     * new evictor with the specified delay.</p>
-     *
-     * <p>This method needs to be final, since it is called from a constructor.
-     * See POOL-195.</p>
+     * 启动驱逐器，在延迟指定时间后开始对池子进行驱逐测试
      *
      * @param delay time in milliseconds before start and between eviction runs
      */
@@ -742,19 +217,44 @@ public abstract class BaseGenericObjectPool<T> extends BaseObject {
     }
 
     /**
-     * Stops the evictor.
+     * 停止驱逐器
      */
     void stopEvictor() {
         startEvictor(-1L);
     }
 
     /**
-     * Tries to ensure that the configured minimum number of idle instances are
-     * available in the pool.
+     * 对池子中的空闲对象进行驱逐测试，如果测试通过，则丢弃到invalid空间
+     *
+     * @throws Exception when there is a problem evicting idle objects.
+     */
+    public abstract void evict() throws Exception;
+
+    /**
+     * 确保配置的最小空闲实例数在池中可用
      *
      * @throws Exception if an error occurs creating idle instances
      */
     abstract void ensureMinIdle() throws Exception;
+
+    /**
+     * Closes the pool, destroys the remaining idle objects and, if registered
+     * in JMX, deregisters it.
+     */
+    public abstract void close();
+
+    /**
+     * Has this pool instance been closed.
+     *
+     * @return <code>true</code> when this pool has been closed.
+     */
+    public final boolean isClosed() {
+        return closed;
+    }
+
+
+
+
 
 
     // Monitoring (primarily JMX) related methods
@@ -903,7 +403,6 @@ public abstract class BaseGenericObjectPool<T> extends BaseObject {
     public final SwallowedExceptionListener getSwallowedExceptionListener() {
         return swallowedExceptionListener;
     }
-
     /**
      * The listener used (if any) to receive notifications of exceptions
      * unavoidably swallowed by the pool.
@@ -914,7 +413,6 @@ public abstract class BaseGenericObjectPool<T> extends BaseObject {
     public final void setSwallowedExceptionListener(final SwallowedExceptionListener swallowedExceptionListener) {
         this.swallowedExceptionListener = swallowedExceptionListener;
     }
-
     /**
      * Swallows an exception and notifies the configured listener for swallowed
      * exceptions queue.
@@ -936,7 +434,6 @@ public abstract class BaseGenericObjectPool<T> extends BaseObject {
             // Ignore. Enjoy the irony.
         }
     }
-
     /**
      * 从池中借用对象后更新统计信息
      *
@@ -960,7 +457,6 @@ public abstract class BaseGenericObjectPool<T> extends BaseObject {
             }
         } while (!maxBorrowWaitTimeMillis.compareAndSet(currentMax, waitTime));
     }
-
     /**
      * Updates statistics after an object is returned to the pool.
      *
@@ -971,7 +467,6 @@ public abstract class BaseGenericObjectPool<T> extends BaseObject {
         returnedCount.incrementAndGet();
         activeTimes.add(activeTime);
     }
-
     /**
      * 将对象标记为归还状态
      *
@@ -988,7 +483,6 @@ public abstract class BaseGenericObjectPool<T> extends BaseObject {
             pooledObject.markReturning();
         }
     }
-
     /**
      * Unregisters this pool's MBean.
      */
@@ -1002,7 +496,6 @@ public abstract class BaseGenericObjectPool<T> extends BaseObject {
             }
         }
     }
-
     /**
      * Registers the pool with the platform MBean server.
      * The registered name will be
@@ -1059,7 +552,6 @@ public abstract class BaseGenericObjectPool<T> extends BaseObject {
         }
         return newObjectName;
     }
-
     /**
      * Gets the stack trace of an exception as a string.
      *
@@ -1076,10 +568,228 @@ public abstract class BaseGenericObjectPool<T> extends BaseObject {
         return w.toString();
     }
 
-    // Inner classes
+
+
+    // getter and setter ...
+
+    public final int getMaxTotal() {
+        return maxTotal;
+    }
+    public final void setMaxTotal(final int maxTotal) {
+        this.maxTotal = maxTotal;
+    }
+    public final boolean getBlockWhenExhausted() {
+        return blockWhenExhausted;
+    }
+    public final void setBlockWhenExhausted(final boolean blockWhenExhausted) {
+        this.blockWhenExhausted = blockWhenExhausted;
+    }
+    public final long getMaxWaitMillis() {
+        return maxWaitMillis;
+    }
+    public final void setMaxWaitMillis(final long maxWaitMillis) {
+        this.maxWaitMillis = maxWaitMillis;
+    }
+    public final boolean getLifo() {
+        return lifo;
+    }
+    public final void setLifo(final boolean lifo) {
+        this.lifo = lifo;
+    }
+    public final boolean getFairness() {
+        return fairness;
+    }
+    public final boolean getTestOnCreate() {
+        return testOnCreate;
+    }
+    public final void setTestOnCreate(final boolean testOnCreate) {
+        this.testOnCreate = testOnCreate;
+    }
+    public final boolean getTestOnBorrow() {
+        return testOnBorrow;
+    }
+    public final void setTestOnBorrow(final boolean testOnBorrow) {
+        this.testOnBorrow = testOnBorrow;
+    }
+    public final boolean getTestOnReturn() {
+        return testOnReturn;
+    }
+    public final void setTestOnReturn(final boolean testOnReturn) {
+        this.testOnReturn = testOnReturn;
+    }
+    public final boolean getTestWhileIdle() {
+        return testWhileIdle;
+    }
+    public final void setTestWhileIdle(final boolean testWhileIdle) {
+        this.testWhileIdle = testWhileIdle;
+    }
+    public final long getTimeBetweenEvictionRunsMillis() {
+        return timeBetweenEvictionRunsMillis;
+    }
+    public final void setTimeBetweenEvictionRunsMillis(final long timeBetweenEvictionRunsMillis) {
+        this.timeBetweenEvictionRunsMillis = timeBetweenEvictionRunsMillis;
+        startEvictor(timeBetweenEvictionRunsMillis);
+    }
+    public final int getNumTestsPerEvictionRun() {
+        return numTestsPerEvictionRun;
+    }
+    public final void setNumTestsPerEvictionRun(final int numTestsPerEvictionRun) {
+        this.numTestsPerEvictionRun = numTestsPerEvictionRun;
+    }
+    public final long getMinEvictableIdleTimeMillis() {
+        return minEvictableIdleTimeMillis;
+    }
+    public final void setMinEvictableIdleTimeMillis(final long minEvictableIdleTimeMillis) {
+        this.minEvictableIdleTimeMillis = minEvictableIdleTimeMillis;
+    }
+    public final long getSoftMinEvictableIdleTimeMillis() {
+        return softMinEvictableIdleTimeMillis;
+    }
+    public final void setSoftMinEvictableIdleTimeMillis(final long softMinEvictableIdleTimeMillis) {
+        this.softMinEvictableIdleTimeMillis = softMinEvictableIdleTimeMillis;
+    }
+    public EvictionPolicy<T> getEvictionPolicy() {
+        return evictionPolicy;
+    }
+    public final String getEvictionPolicyClassName() {
+        return evictionPolicy.getClass().getName();
+    }
+    public final void setEvictionPolicyClassName(final String evictionPolicyClassName, final ClassLoader classLoader) {
+        // Getting epClass here and now best matches the caller's environment
+        final Class<?> epClass = EvictionPolicy.class;
+        final ClassLoader epClassLoader = epClass.getClassLoader();
+        try {
+            try {
+                setEvictionPolicy(evictionPolicyClassName, classLoader);
+            } catch (final ClassCastException | ClassNotFoundException e) {
+                setEvictionPolicy(evictionPolicyClassName, epClassLoader);
+            }
+        } catch (final ClassCastException e) {
+            throw new IllegalArgumentException("Class " + evictionPolicyClassName + " from class loaders [" +
+                    classLoader + ", " + epClassLoader + "] do not implement " + EVICTION_POLICY_TYPE_NAME);
+        } catch (final ClassNotFoundException | InstantiationException | IllegalAccessException |
+                InvocationTargetException | NoSuchMethodException e) {
+            final String exMessage = "Unable to create " + EVICTION_POLICY_TYPE_NAME + " instance of type " +
+                    evictionPolicyClassName;
+            throw new IllegalArgumentException(exMessage, e);
+        }
+    }
+    public final void setEvictionPolicyClassName(final String evictionPolicyClassName) {
+        setEvictionPolicyClassName(evictionPolicyClassName, Thread.currentThread().getContextClassLoader());
+    }
+    public void setEvictionPolicy(final EvictionPolicy<T> evictionPolicy) {
+        this.evictionPolicy = evictionPolicy;
+    }
+    @SuppressWarnings("unchecked")
+    private void setEvictionPolicy(final String className, final ClassLoader classLoader) throws ClassNotFoundException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+        final Class<?> clazz = Class.forName(className, true, classLoader);
+        final Object policy = clazz.getConstructor().newInstance();
+        this.evictionPolicy = (EvictionPolicy<T>) policy;
+    }
+    /**
+     * Gets the timeout that will be used when waiting for the Evictor to
+     * shutdown if this pool is closed and it is the only pool still using the
+     * the value for the Evictor.
+     *
+     * @return The timeout in milliseconds that will be used while waiting for
+     * the Evictor to shut down.
+     */
+    public final long getEvictorShutdownTimeoutMillis() {
+        return evictorShutdownTimeoutMillis;
+    }
+    /**
+     * Sets the timeout that will be used when waiting for the Evictor to
+     * shutdown if this pool is closed and it is the only pool still using the
+     * the value for the Evictor.
+     *
+     * @param evictorShutdownTimeoutMillis the timeout in milliseconds that
+     *                                     will be used while waiting for the
+     *                                     Evictor to shut down.
+     */
+    public final void setEvictorShutdownTimeoutMillis(final long evictorShutdownTimeoutMillis) {
+        this.evictorShutdownTimeoutMillis = evictorShutdownTimeoutMillis;
+    }
+
+
+
+    @Override
+    protected void toStringAppendFields(final StringBuilder builder) {
+        builder.append("maxTotal=");
+        builder.append(maxTotal);
+        builder.append(", blockWhenExhausted=");
+        builder.append(blockWhenExhausted);
+        builder.append(", maxWaitMillis=");
+        builder.append(maxWaitMillis);
+        builder.append(", lifo=");
+        builder.append(lifo);
+        builder.append(", fairness=");
+        builder.append(fairness);
+        builder.append(", testOnCreate=");
+        builder.append(testOnCreate);
+        builder.append(", testOnBorrow=");
+        builder.append(testOnBorrow);
+        builder.append(", testOnReturn=");
+        builder.append(testOnReturn);
+        builder.append(", testWhileIdle=");
+        builder.append(testWhileIdle);
+        builder.append(", timeBetweenEvictionRunsMillis=");
+        builder.append(timeBetweenEvictionRunsMillis);
+        builder.append(", numTestsPerEvictionRun=");
+        builder.append(numTestsPerEvictionRun);
+        builder.append(", minEvictableIdleTimeMillis=");
+        builder.append(minEvictableIdleTimeMillis);
+        builder.append(", softMinEvictableIdleTimeMillis=");
+        builder.append(softMinEvictableIdleTimeMillis);
+        builder.append(", evictionPolicy=");
+        builder.append(evictionPolicy);
+        builder.append(", closeLock=");
+        builder.append(closeLock);
+        builder.append(", closed=");
+        builder.append(closed);
+        builder.append(", evictionLock=");
+        builder.append(evictionLock);
+        builder.append(", evictor=");
+        builder.append(evictor);
+        builder.append(", evictionIterator=");
+        builder.append(evictionIterator);
+        builder.append(", factoryClassLoader=");
+        builder.append(factoryClassLoader);
+        builder.append(", oname=");
+        builder.append(objectName);
+        builder.append(", creationStackTrace=");
+        builder.append(creationStackTrace);
+        builder.append(", borrowedCount=");
+        builder.append(borrowedCount);
+        builder.append(", returnedCount=");
+        builder.append(returnedCount);
+        builder.append(", createdCount=");
+        builder.append(createdCount);
+        builder.append(", destroyedCount=");
+        builder.append(destroyedCount);
+        builder.append(", destroyedByEvictorCount=");
+        builder.append(destroyedByEvictorCount);
+        builder.append(", destroyedByBorrowValidationCount=");
+        builder.append(destroyedByBorrowValidationCount);
+        builder.append(", activeTimes=");
+        builder.append(activeTimes);
+        builder.append(", idleTimes=");
+        builder.append(idleTimes);
+        builder.append(", waitTimes=");
+        builder.append(waitTimes);
+        builder.append(", maxBorrowWaitTimeMillis=");
+        builder.append(maxBorrowWaitTimeMillis);
+        builder.append(", swallowedExceptionListener=");
+        builder.append(swallowedExceptionListener);
+    }
+
+
+
+
+
+    // 内部类
 
     /**
-     * The idle object evictor {@link TimerTask}.
+     * 驱逐器：对池子中的空闲对象进行驱逐测试，对于符合驱逐条件的对象，将会被对象池无情的驱逐出空闲空间，并丢弃到invalid空间。
      *
      * @see GenericKeyedObjectPool#setTimeBetweenEvictionRunsMillis
      */
@@ -1097,16 +807,13 @@ public abstract class BaseGenericObjectPool<T> extends BaseObject {
          */
         @Override
         public void run() {
-            final ClassLoader savedClassLoader =
-                    Thread.currentThread().getContextClassLoader();
+            final ClassLoader savedClassLoader = Thread.currentThread().getContextClassLoader();
             try {
                 if (factoryClassLoader != null) {
                     // Set the class loader for the factory
                     final ClassLoader cl = factoryClassLoader.get();
                     if (cl == null) {
-                        // The pool has been dereferenced and the class loader
-                        // GC'd. Cancel this timer so the pool can be GC'd as
-                        // well.
+                        // 该池已被取消引用，并且类加载器已添加GC。取消此计时器，以便也可以对池进行GC处理。
                         cancel();
                         return;
                     }
@@ -1119,16 +826,17 @@ public abstract class BaseGenericObjectPool<T> extends BaseObject {
                 } catch (final Exception e) {
                     swallowException(e);
                 } catch (final OutOfMemoryError oome) {
-                    // Log problem but give evictor thread a chance to continue
-                    // in case error is recoverable
+                    // 记录问题，但在错误可恢复的情况下让退出线程有机会继续操作
                     oome.printStackTrace(System.err);
                 }
-                // Re-create idle instances.
+
+                // 驱逐完成后，要确保配置的最小空闲实例数在池中可用
                 try {
                     ensureMinIdle();
                 } catch (final Exception e) {
                     swallowException(e);
                 }
+
             } finally {
                 // Restore the previous CCL
                 Thread.currentThread().setContextClassLoader(savedClassLoader);
@@ -1225,7 +933,7 @@ public abstract class BaseGenericObjectPool<T> extends BaseObject {
     }
 
     /**
-     * The idle object eviction iterator. Holds a reference to the idle objects.
+     * 保存对空闲对象的引用，便于驱逐器遍历池子中的空闲对象
      */
     class EvictionIterator implements Iterator<PooledObject<T>> {
 
@@ -1283,11 +991,7 @@ public abstract class BaseGenericObjectPool<T> extends BaseObject {
     }
 
     /**
-     * Wrapper for objects under management by the pool.
-     * <p>
-     * GenericObjectPool and GenericKeyedObjectPool maintain references to all
-     * objects under management using maps keyed on the objects. This wrapper
-     * class ensures that objects can work as hash keys.
+     * 用于封装一个池对象，一次作为对象的唯一标识
      *
      * @param <T> type of objects in the pool
      */
@@ -1335,75 +1039,6 @@ public abstract class BaseGenericObjectPool<T> extends BaseObject {
         }
     }
 
-    @Override
-    protected void toStringAppendFields(final StringBuilder builder) {
-        builder.append("maxTotal=");
-        builder.append(maxTotal);
-        builder.append(", blockWhenExhausted=");
-        builder.append(blockWhenExhausted);
-        builder.append(", maxWaitMillis=");
-        builder.append(maxWaitMillis);
-        builder.append(", lifo=");
-        builder.append(lifo);
-        builder.append(", fairness=");
-        builder.append(fairness);
-        builder.append(", testOnCreate=");
-        builder.append(testOnCreate);
-        builder.append(", testOnBorrow=");
-        builder.append(testOnBorrow);
-        builder.append(", testOnReturn=");
-        builder.append(testOnReturn);
-        builder.append(", testWhileIdle=");
-        builder.append(testWhileIdle);
-        builder.append(", timeBetweenEvictionRunsMillis=");
-        builder.append(timeBetweenEvictionRunsMillis);
-        builder.append(", numTestsPerEvictionRun=");
-        builder.append(numTestsPerEvictionRun);
-        builder.append(", minEvictableIdleTimeMillis=");
-        builder.append(minEvictableIdleTimeMillis);
-        builder.append(", softMinEvictableIdleTimeMillis=");
-        builder.append(softMinEvictableIdleTimeMillis);
-        builder.append(", evictionPolicy=");
-        builder.append(evictionPolicy);
-        builder.append(", closeLock=");
-        builder.append(closeLock);
-        builder.append(", closed=");
-        builder.append(closed);
-        builder.append(", evictionLock=");
-        builder.append(evictionLock);
-        builder.append(", evictor=");
-        builder.append(evictor);
-        builder.append(", evictionIterator=");
-        builder.append(evictionIterator);
-        builder.append(", factoryClassLoader=");
-        builder.append(factoryClassLoader);
-        builder.append(", oname=");
-        builder.append(objectName);
-        builder.append(", creationStackTrace=");
-        builder.append(creationStackTrace);
-        builder.append(", borrowedCount=");
-        builder.append(borrowedCount);
-        builder.append(", returnedCount=");
-        builder.append(returnedCount);
-        builder.append(", createdCount=");
-        builder.append(createdCount);
-        builder.append(", destroyedCount=");
-        builder.append(destroyedCount);
-        builder.append(", destroyedByEvictorCount=");
-        builder.append(destroyedByEvictorCount);
-        builder.append(", destroyedByBorrowValidationCount=");
-        builder.append(destroyedByBorrowValidationCount);
-        builder.append(", activeTimes=");
-        builder.append(activeTimes);
-        builder.append(", idleTimes=");
-        builder.append(idleTimes);
-        builder.append(", waitTimes=");
-        builder.append(waitTimes);
-        builder.append(", maxBorrowWaitTimeMillis=");
-        builder.append(maxBorrowWaitTimeMillis);
-        builder.append(", swallowedExceptionListener=");
-        builder.append(swallowedExceptionListener);
-    }
 
 
 }

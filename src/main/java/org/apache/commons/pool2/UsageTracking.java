@@ -17,11 +17,11 @@
 package org.apache.commons.pool2;
 
 /**
- * This interface may be implemented by an object pool to enable clients
- * (primarily those clients that wrap pools to provide pools with extended
- * features) to provide additional information to the pool relating to object
- * using allowing more informed decisions and reporting to be made regarding
- * abandoned objects.
+ * 什么叫追踪？
+ *  就是在池中某个对象的任何一个方法被调用时，都会创建一个调用堆栈快照。
+ *  logAbandoned为true时，useUsageTracking也为true时，那么回收被遗弃的对象时，就会打印该对象最后一次的调用堆栈信息了。
+ *  如果useUsageTracking为true，即便是logAbandoned为false，那么每次对象的方法调用，一样还是会创建调用堆栈对象。只不过最终被回收时不会打印输出。
+ *  生产环境该属性也不建议设置为true。
  *
  * @param <T> The type of object provided by the pool.
  * @since 2.0

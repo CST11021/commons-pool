@@ -17,35 +17,20 @@
 package org.apache.commons.pool2.impl;
 
 /**
- * This class is used by pool implementations to pass configuration information
- * to {@link EvictionPolicy} instances. The {@link EvictionPolicy} may also have
- * its own specific configuration attributes.
- * <p>
- * This class is immutable and thread-safe.
- * </p>
+ * 驱逐配置
  *
  * @since 2.0
  */
 public class EvictionConfig {
 
+    /** 池对象保持空闲状态的时长，超过了该值，会被驱逐 */
     private final long idleEvictTime;
+    /** 软标准情况下，池对象保持空闲状态的时长，超过了该值，判断是否驱逐，软标准，自己设值一般比idleEvictTime小，结合minIdle使用 */
     private final long idleSoftEvictTime;
+    /** 软标准情况下,至少留下几个object继续保持idle(节省开销) */
     private final int minIdle;
 
-    /**
-     * Create a new eviction configuration with the specified parameters.
-     * Instances are immutable.
-     *
-     * @param poolIdleEvictTime     Expected to be provided by
-     *                              {@link BaseGenericObjectPool#getMinEvictableIdleTimeMillis()}
-     * @param poolIdleSoftEvictTime Expected to be provided by
-     *                              {@link BaseGenericObjectPool#getSoftMinEvictableIdleTimeMillis()}
-     * @param minIdle               Expected to be provided by
-     *                              {@link GenericObjectPool#getMinIdle()} or
-     *                              {@link GenericKeyedObjectPool#getMinIdlePerKey()}
-     */
-    public EvictionConfig(final long poolIdleEvictTime, final long poolIdleSoftEvictTime,
-                          final int minIdle) {
+    public EvictionConfig(final long poolIdleEvictTime, final long poolIdleSoftEvictTime, final int minIdle) {
         if (poolIdleEvictTime > 0) {
             idleEvictTime = poolIdleEvictTime;
         } else {
