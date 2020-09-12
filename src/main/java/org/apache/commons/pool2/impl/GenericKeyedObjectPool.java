@@ -80,8 +80,7 @@ import org.apache.commons.pool2.SwallowedExceptionListener;
  * @see GenericObjectPool
  * @since 2.0
  */
-public class GenericKeyedObjectPool<K, T> extends BaseGenericObjectPool<T>
-        implements KeyedObjectPool<K, T>, GenericKeyedObjectPoolMXBean<K> {
+public class GenericKeyedObjectPool<K, T> extends BaseGenericObjectPool<T> implements KeyedObjectPool<K, T>, GenericKeyedObjectPoolMXBean<K> {
 
     /**
      * Create a new <code>GenericKeyedObjectPool</code> using defaults from
@@ -92,7 +91,6 @@ public class GenericKeyedObjectPool<K, T> extends BaseGenericObjectPool<T>
     public GenericKeyedObjectPool(final KeyedPooledObjectFactory<K, T> factory) {
         this(factory, new GenericKeyedObjectPoolConfig<T>());
     }
-
     /**
      * Create a new <code>GenericKeyedObjectPool</code> using a specific
      * configuration.
@@ -103,8 +101,7 @@ public class GenericKeyedObjectPool<K, T> extends BaseGenericObjectPool<T>
      *                the configuration object will not be reflected in the
      *                pool.
      */
-    public GenericKeyedObjectPool(final KeyedPooledObjectFactory<K, T> factory,
-                                  final GenericKeyedObjectPoolConfig<T> config) {
+    public GenericKeyedObjectPool(final KeyedPooledObjectFactory<K, T> factory, final GenericKeyedObjectPoolConfig<T> config) {
 
         super(config, ONAME_BASE, config.getJmxNamePrefix());
 
@@ -118,114 +115,7 @@ public class GenericKeyedObjectPool<K, T> extends BaseGenericObjectPool<T>
         setConfig(config);
     }
 
-    /**
-     * Returns the limit on the number of object instances allocated by the pool
-     * (checked out or idle), per key. When the limit is reached, the sub-pool
-     * is said to be exhausted. A negative value indicates no limit.
-     *
-     * @return the limit on the number of active instances per key
-     * @see #setMaxTotalPerKey
-     */
-    @Override
-    public int getMaxTotalPerKey() {
-        return maxTotalPerKey;
-    }
 
-    /**
-     * Sets the limit on the number of object instances allocated by the pool
-     * (checked out or idle), per key. When the limit is reached, the sub-pool
-     * is said to be exhausted. A negative value indicates no limit.
-     *
-     * @param maxTotalPerKey the limit on the number of active instances per key
-     * @see #getMaxTotalPerKey
-     */
-    public void setMaxTotalPerKey(final int maxTotalPerKey) {
-        this.maxTotalPerKey = maxTotalPerKey;
-    }
-
-
-    /**
-     * Returns the cap on the number of "idle" instances per key in the pool.
-     * If maxIdlePerKey is set too low on heavily loaded systems it is possible
-     * you will see objects being destroyed and almost immediately new objects
-     * being created. This is a result of the active threads momentarily
-     * returning objects faster than they are requesting them, causing the
-     * number of idle objects to rise above maxIdlePerKey. The best value for
-     * maxIdlePerKey for heavily loaded system will vary but the default is a
-     * good starting point.
-     *
-     * @return the maximum number of "idle" instances that can be held in a
-     * given keyed sub-pool or a negative value if there is no limit
-     * @see #setMaxIdlePerKey
-     */
-    @Override
-    public int getMaxIdlePerKey() {
-        return maxIdlePerKey;
-    }
-
-    /**
-     * Sets the cap on the number of "idle" instances per key in the pool.
-     * If maxIdlePerKey is set too low on heavily loaded systems it is possible
-     * you will see objects being destroyed and almost immediately new objects
-     * being created. This is a result of the active threads momentarily
-     * returning objects faster than they are requesting them, causing the
-     * number of idle objects to rise above maxIdlePerKey. The best value for
-     * maxIdlePerKey for heavily loaded system will vary but the default is a
-     * good starting point.
-     *
-     * @param maxIdlePerKey the maximum number of "idle" instances that can be
-     *                      held in a given keyed sub-pool. Use a negative value
-     *                      for no limit
-     * @see #getMaxIdlePerKey
-     */
-    public void setMaxIdlePerKey(final int maxIdlePerKey) {
-        this.maxIdlePerKey = maxIdlePerKey;
-    }
-
-    /**
-     * Sets the target for the minimum number of idle objects to maintain in
-     * each of the keyed sub-pools. This setting only has an effect if it is
-     * positive and {@link #getTimeBetweenEvictionRunsMillis()} is greater than
-     * zero. If this is the case, an attempt is made to ensure that each
-     * sub-pool has the required minimum number of instances during idle object
-     * eviction runs.
-     * <p>
-     * If the configured value of minIdlePerKey is greater than the configured
-     * value for maxIdlePerKey then the value of maxIdlePerKey will be used
-     * instead.
-     *
-     * @param minIdlePerKey The minimum size of the each keyed pool
-     * @see #getMinIdlePerKey
-     * @see #getMaxIdlePerKey()
-     * @see #setTimeBetweenEvictionRunsMillis
-     */
-    public void setMinIdlePerKey(final int minIdlePerKey) {
-        this.minIdlePerKey = minIdlePerKey;
-    }
-
-    /**
-     * Returns the target for the minimum number of idle objects to maintain in
-     * each of the keyed sub-pools. This setting only has an effect if it is
-     * positive and {@link #getTimeBetweenEvictionRunsMillis()} is greater than
-     * zero. If this is the case, an attempt is made to ensure that each
-     * sub-pool has the required minimum number of instances during idle object
-     * eviction runs.
-     * <p>
-     * If the configured value of minIdlePerKey is greater than the configured
-     * value for maxIdlePerKey then the value of maxIdlePerKey will be used
-     * instead.
-     *
-     * @return minimum size of the each keyed pool
-     * @see #setTimeBetweenEvictionRunsMillis
-     */
-    @Override
-    public int getMinIdlePerKey() {
-        final int maxIdlePerKeySave = getMaxIdlePerKey();
-        if (this.minIdlePerKey > maxIdlePerKeySave) {
-            return maxIdlePerKeySave;
-        }
-        return minIdlePerKey;
-    }
 
     /**
      * Sets the configuration.
@@ -413,7 +303,6 @@ public class GenericKeyedObjectPool<K, T> extends BaseGenericObjectPool<T>
         return p.getObject();
     }
 
-
     /**
      * Returns an object to a keyed sub-pool.
      * <p>
@@ -565,7 +454,6 @@ public class GenericKeyedObjectPool<K, T> extends BaseGenericObjectPool<T>
         }
     }
 
-
     /**
      * Clears any objects sitting idle in the pool by removing them from the
      * idle instance sub-pools and then invoking the configured
@@ -592,7 +480,6 @@ public class GenericKeyedObjectPool<K, T> extends BaseGenericObjectPool<T>
             clear(iter.next());
         }
     }
-
 
     /**
      * Clears the specified sub-pool, removing all pooled instances
@@ -626,12 +513,10 @@ public class GenericKeyedObjectPool<K, T> extends BaseGenericObjectPool<T>
         }
     }
 
-
     @Override
     public int getNumActive() {
         return numTotal.get() - getNumIdle();
     }
-
 
     @Override
     public int getNumIdle() {
@@ -645,7 +530,6 @@ public class GenericKeyedObjectPool<K, T> extends BaseGenericObjectPool<T>
         return result;
     }
 
-
     @Override
     public int getNumActive(final K key) {
         final ObjectDeque<T> objectDeque = poolMap.get(key);
@@ -655,7 +539,6 @@ public class GenericKeyedObjectPool<K, T> extends BaseGenericObjectPool<T>
         }
         return 0;
     }
-
 
     @Override
     public int getNumIdle(final K key) {
@@ -704,7 +587,6 @@ public class GenericKeyedObjectPool<K, T> extends BaseGenericObjectPool<T>
             clear();
         }
     }
-
 
     /**
      * Clears oldest 15% of objects in pool.  The method sorts the objects into
@@ -1066,8 +948,7 @@ public class GenericKeyedObjectPool<K, T> extends BaseGenericObjectPool<T>
      * @return {@code true} if the object was destroyed, otherwise {@code false}
      * @throws Exception If the object destruction failed
      */
-    private boolean destroy(final K key, final PooledObject<T> toDestroy, final boolean always)
-            throws Exception {
+    private boolean destroy(final K key, final PooledObject<T> toDestroy, final boolean always) throws Exception {
 
         final ObjectDeque<T> objectDeque = register(key);
 
@@ -1537,46 +1418,155 @@ public class GenericKeyedObjectPool<K, T> extends BaseGenericObjectPool<T>
     }
 
     //--- configuration attributes ---------------------------------------------
-    private volatile int maxIdlePerKey =
-            GenericKeyedObjectPoolConfig.DEFAULT_MAX_IDLE_PER_KEY;
-    private volatile int minIdlePerKey =
-            GenericKeyedObjectPoolConfig.DEFAULT_MIN_IDLE_PER_KEY;
-    private volatile int maxTotalPerKey =
-            GenericKeyedObjectPoolConfig.DEFAULT_MAX_TOTAL_PER_KEY;
+    private volatile int maxIdlePerKey = GenericKeyedObjectPoolConfig.DEFAULT_MAX_IDLE_PER_KEY;
+    private volatile int minIdlePerKey = GenericKeyedObjectPoolConfig.DEFAULT_MIN_IDLE_PER_KEY;
+    private volatile int maxTotalPerKey = GenericKeyedObjectPoolConfig.DEFAULT_MAX_TOTAL_PER_KEY;
     private final KeyedPooledObjectFactory<K, T> factory;
     private final boolean fairness;
 
 
     //--- internal attributes --------------------------------------------------
 
-    /*
+    /**
      * My hash of sub-pools (ObjectQueue). The list of keys <b>must</b> be kept
      * in step with {@link #poolKeyList} using {@link #keyLock} to ensure any
      * changes to the list of current keys is made in a thread-safe manner.
      */
     private final Map<K, ObjectDeque<T>> poolMap =
-            new ConcurrentHashMap<>(); // @GuardedBy("keyLock") for write access (and some read access)
-    /*
+            new ConcurrentHashMap<>();
+    /**
      * List of pool keys - used to control eviction order. The list of keys
      * <b>must</b> be kept in step with {@link #poolMap} using {@link #keyLock}
      * to ensure any changes to the list of current keys is made in a
      * thread-safe manner.
      */
-    private final List<K> poolKeyList = new ArrayList<>(); // @GuardedBy("keyLock")
+    private final List<K> poolKeyList = new ArrayList<>();
     private final ReadWriteLock keyLock = new ReentrantReadWriteLock(true);
-    /*
+    /**
      * The combined count of the currently active objects for all keys and those
      * in the process of being created. Under load, it may exceed
      * {@link #maxTotal} but there will never be more than {@link #maxTotal}
      * created at any one time.
      */
     private final AtomicInteger numTotal = new AtomicInteger(0);
-    private Iterator<K> evictionKeyIterator = null; // @GuardedBy("evictionLock")
-    private K evictionKey = null; // @GuardedBy("evictionLock")
+    private Iterator<K> evictionKeyIterator = null;
+    private K evictionKey = null;
 
     // JMX specific attributes
-    private static final String ONAME_BASE =
-            "org.apache.commons.pool2:type=GenericKeyedObjectPool,name=";
+    private static final String ONAME_BASE = "org.apache.commons.pool2:type=GenericKeyedObjectPool,name=";
+
+
+
+
+
+
+    // getter and setter ...
+
+    /**
+     * Returns the limit on the number of object instances allocated by the pool
+     * (checked out or idle), per key. When the limit is reached, the sub-pool
+     * is said to be exhausted. A negative value indicates no limit.
+     *
+     * @return the limit on the number of active instances per key
+     * @see #setMaxTotalPerKey
+     */
+    @Override
+    public int getMaxTotalPerKey() {
+        return maxTotalPerKey;
+    }
+    /**
+     * Sets the limit on the number of object instances allocated by the pool
+     * (checked out or idle), per key. When the limit is reached, the sub-pool
+     * is said to be exhausted. A negative value indicates no limit.
+     *
+     * @param maxTotalPerKey the limit on the number of active instances per key
+     * @see #getMaxTotalPerKey
+     */
+    public void setMaxTotalPerKey(final int maxTotalPerKey) {
+        this.maxTotalPerKey = maxTotalPerKey;
+    }
+    /**
+     * Returns the cap on the number of "idle" instances per key in the pool.
+     * If maxIdlePerKey is set too low on heavily loaded systems it is possible
+     * you will see objects being destroyed and almost immediately new objects
+     * being created. This is a result of the active threads momentarily
+     * returning objects faster than they are requesting them, causing the
+     * number of idle objects to rise above maxIdlePerKey. The best value for
+     * maxIdlePerKey for heavily loaded system will vary but the default is a
+     * good starting point.
+     *
+     * @return the maximum number of "idle" instances that can be held in a
+     * given keyed sub-pool or a negative value if there is no limit
+     * @see #setMaxIdlePerKey
+     */
+    @Override
+    public int getMaxIdlePerKey() {
+        return maxIdlePerKey;
+    }
+    /**
+     * Sets the cap on the number of "idle" instances per key in the pool.
+     * If maxIdlePerKey is set too low on heavily loaded systems it is possible
+     * you will see objects being destroyed and almost immediately new objects
+     * being created. This is a result of the active threads momentarily
+     * returning objects faster than they are requesting them, causing the
+     * number of idle objects to rise above maxIdlePerKey. The best value for
+     * maxIdlePerKey for heavily loaded system will vary but the default is a
+     * good starting point.
+     *
+     * @param maxIdlePerKey the maximum number of "idle" instances that can be
+     *                      held in a given keyed sub-pool. Use a negative value
+     *                      for no limit
+     * @see #getMaxIdlePerKey
+     */
+    public void setMaxIdlePerKey(final int maxIdlePerKey) {
+        this.maxIdlePerKey = maxIdlePerKey;
+    }
+    /**
+     * Returns the target for the minimum number of idle objects to maintain in
+     * each of the keyed sub-pools. This setting only has an effect if it is
+     * positive and {@link #getTimeBetweenEvictionRunsMillis()} is greater than
+     * zero. If this is the case, an attempt is made to ensure that each
+     * sub-pool has the required minimum number of instances during idle object
+     * eviction runs.
+     * <p>
+     * If the configured value of minIdlePerKey is greater than the configured
+     * value for maxIdlePerKey then the value of maxIdlePerKey will be used
+     * instead.
+     *
+     * @return minimum size of the each keyed pool
+     * @see #setTimeBetweenEvictionRunsMillis
+     */
+    @Override
+    public int getMinIdlePerKey() {
+        final int maxIdlePerKeySave = getMaxIdlePerKey();
+        if (this.minIdlePerKey > maxIdlePerKeySave) {
+            return maxIdlePerKeySave;
+        }
+        return minIdlePerKey;
+    }
+    /**
+     * Sets the target for the minimum number of idle objects to maintain in
+     * each of the keyed sub-pools. This setting only has an effect if it is
+     * positive and {@link #getTimeBetweenEvictionRunsMillis()} is greater than
+     * zero. If this is the case, an attempt is made to ensure that each
+     * sub-pool has the required minimum number of instances during idle object
+     * eviction runs.
+     * <p>
+     * If the configured value of minIdlePerKey is greater than the configured
+     * value for maxIdlePerKey then the value of maxIdlePerKey will be used
+     * instead.
+     *
+     * @param minIdlePerKey The minimum size of the each keyed pool
+     * @see #getMinIdlePerKey
+     * @see #getMaxIdlePerKey()
+     * @see #setTimeBetweenEvictionRunsMillis
+     */
+    public void setMinIdlePerKey(final int minIdlePerKey) {
+        this.minIdlePerKey = minIdlePerKey;
+    }
+
+
+
 
     @Override
     protected void toStringAppendFields(final StringBuilder builder) {

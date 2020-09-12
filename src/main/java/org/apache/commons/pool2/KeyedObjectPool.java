@@ -22,41 +22,8 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
- * A "keyed" pooling interface.
- * <p>
- * A keyed pool maintains a pool of instances for each key value.
- * </p>
- * <p>
- * Example of use:
- * </p>
- * <pre style="border:solid thin; padding: 1ex;"
- * > Object obj = <code style="color:#00C">null</code>;
- * Object key = <code style="color:#C00">"Key"</code>;
- *
- * <code style="color:#00C">try</code> {
- * obj = pool.borrowObject(key);
- * <code style="color:#0C0">//...use the object...</code>
- * } <code style="color:#00C">catch</code>(Exception e) {
- * <code style="color:#0C0">// invalidate the object</code>
- * pool.invalidateObject(key, obj);
- * <code style="color:#0C0">// do not return the object to the pool twice</code>
- * obj = <code style="color:#00C">null</code>;
- * } <code style="color:#00C">finally</code> {
- * <code style="color:#0C0">// make sure the object is returned to the pool</code>
- * <code style="color:#00C">if</code>(<code style="color:#00C">null</code> != obj) {
- * pool.returnObject(key, obj);
- * }
- * }</pre>
- * <p>
- * {@link KeyedObjectPool} implementations <i>may</i> choose to store at most
- * one instance per key value, or may choose to maintain a pool of instances
- * for each key (essentially creating a {@link java.util.Map Map} of
- * {@link ObjectPool pools}).
- * </p>
- * <p>
- * See {@link org.apache.commons.pool2.impl.GenericKeyedObjectPool
- * GenericKeyedObjectPool} for an implementation.
- * </p>
+ * 有时候，仅仅简单的把池中的所有对象都当成一类对象并不能解决所有问题，有时候我们需要根据一些参数比如key值去查找某些指定的池中对象，
+ * 比如可以根据一个参数来决定使用池中具体的那一个数据库连接，等等。此时就需要使用KeyedPoolableObjectFactory和KeyedObjectPool接口。
  *
  * @param <K> The type of keys maintained by this pool.
  * @param <V> Type of element pooled in this pool.
@@ -78,8 +45,7 @@ public interface KeyedObjectPool<K, V> extends Closeable {
      * @throws IllegalStateException         after {@link #close} has been called on this pool.
      * @throws UnsupportedOperationException when this pool cannot add new idle objects.
      */
-    void addObject(K key) throws Exception, IllegalStateException,
-            UnsupportedOperationException;
+    void addObject(K key) throws Exception, IllegalStateException, UnsupportedOperationException;
 
     /**
      * Calls {@link KeyedObjectPool#addObject(Object)} with each
